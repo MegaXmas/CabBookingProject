@@ -8,6 +8,7 @@ public class Client {
     private String phone;
     private String address;
 
+    //-------------Constructor---------------
     public Client(Integer id, String name, String email, String phone, String address) {
         this.id = id;
         this.name = name;
@@ -16,6 +17,7 @@ public class Client {
         this.address = address;
     }
 
+    //------------Getters and Setters-------------
     public Integer getId() {
         return id;
     }
