@@ -5,10 +5,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
-@Repository
-public class ClientRepository {
 
-    private HashMap<String, Client> clientHashMap = new HashMap<>();
+public interface ClientRepository {
+
+
+    List<Client> findAll();
+    Optional<Client> findById(String id);
+    Client save(Client client);
+
 
 }
