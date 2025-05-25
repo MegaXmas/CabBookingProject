@@ -32,11 +32,35 @@ public class ClientRepository {
         }
     }
 
-    List<Client> findAll() { return new ArrayList<Client>(clients.values()); }
+    public List<Client> findAll() {
+        return jdbcTemplate.query("SELECT id, name, email, phone, address FROM clients", new ClientRowMapper());
+    }
 
-    Optional<Client> findById(Integer id) { return Optional.of(clients.get(id)); }
+    public Optional<Client> findById(Integer id) {
+        List<Client> clients = jdbcTemplate.query(
+            "SELECT id, name, email, phone, address FROM clients WHERE id = ?", new ClientRowMapper(), id);
 
-    Client save(Client client);
+            return clients.isEmpty() ? Optional.empty() : Optional.of(clients.get(0));
+    }
 
+    public void newClient(Client client) {
+        jdbcTemplate.update("INSERT INTO client (name, email, phone, address) VALUES (?, ?, ?, ?)",
+                client.getId(), client.getName(), client.getEmail(), client.getPhone(), client.getAddress());
 
+        System.out.println("New client created");
+    }
+
+    public void updateClient(Client client) {
+        jdbcTemplate.update("UPDATE clients SET name =?, email = ?, phone = ?, address = ? WHERE id = ?",
+                client.getId(), client.getName(), client.getEmail(), client.getPhone(), client.getAddress());
+
+        System.out.println("Client " + client.getId() + ", " + client.getName() + "updated");
+    }
+
+    public void deleteClient(Client client) {
+        jdbcTemplate.update("DELETE FROM client WHERE id = ?", client.getId());
+
+        System.out.println("Client " + client.getId() + ", " + client.getName() + "deleted");
+
+    }
 }
