@@ -8,7 +8,9 @@ public class Client {
     private String phone;
     private String address;
 
-    //-------------Constructor---------------
+    //-------------Constructors---------------
+    public Client() {};
+
     public Client(Integer id, String name, String email, String phone, String address) {
         this.id = id;
         this.name = name;
