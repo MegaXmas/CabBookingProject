@@ -6,17 +6,35 @@ import java.util.Optional;
 
 import com.example.cabbooking.model.Client;
 import com.example.cabbooking.repository.ClientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ClientService {
 
-   List<Client> getAllClients() {
-      return ClientRepository.
+   private ClientRepository clientRepository;
+
+   @Autowired
+   public ClientService(ClientRepository clientRepository) {
+      this.clientRepository = clientRepository;
    }
 
-   ;
-   Optional<Client> getClientById(int id);
-   Client addClient(Client client);
-   Client updateClient(int id, Client client);
+   public List<Client> getAllClients() {
+      return clientRepository.findAll();
+   }
+   public Optional<Client> getClientById(Integer id) {
+      return clientRepository.findById(id);
+   }
+   public Client addClient(Client client) {
+      clientRepository.newClient(client);
+      return client;
+   }
+   public Client updateClient(Client client) {
+      clientRepository.updateClient(client);
+      return client;
+   }
+   public void deleteClient(Client client, Integer id) {
+      clientRepository.deleteClient(client, id);
+   }
+
 }

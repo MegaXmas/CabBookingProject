@@ -57,7 +57,7 @@ public class ClientRepository {
         System.out.println("Client " + client.getId() + ", " + client.getName() + "updated");
     }
 
-    public void deleteClient(Client client) {
+    public void deleteClient(Client client, Integer id) {
         jdbcTemplate.update("DELETE FROM client WHERE id = ?", client.getId());
 
         System.out.println("Client " + client.getId() + ", " + client.getName() + "deleted");
