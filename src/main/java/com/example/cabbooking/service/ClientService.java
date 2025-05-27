@@ -1,6 +1,5 @@
 package com.example.cabbooking.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +36,7 @@ public class ClientService {
       return client;
    }
 
-   public void deleteClient(Client client, Integer id) {
-      clientRepository.deleteClient(client, id);
+   public void deleteClient(Integer id) {
+      clientRepository.deleteClient(id);
    }
 }
