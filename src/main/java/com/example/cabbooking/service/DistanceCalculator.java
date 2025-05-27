@@ -3,7 +3,7 @@ package com.example.cabbooking.service;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MilesDistanceCalculator {
+public class DistanceCalculator {
 
     private static final double EARTH_RADIUS_KM = 6371.0;
 
@@ -26,10 +26,13 @@ public class MilesDistanceCalculator {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         double kilometers = EARTH_RADIUS_KM * c;
+        return kilometers;
 
-//---------------Kilometers to Miles Conversion----------------
-        double miles;
-        miles = kilometers * 0.621371;
-        return miles;
     }
+
+    //---------------Kilometers to Miles Conversion----------------
+        public static double kmToMiles(double kilometers) {
+            return kilometers * 0.621371;
+        }
+
 }

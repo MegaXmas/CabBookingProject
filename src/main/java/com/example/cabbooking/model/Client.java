@@ -1,5 +1,7 @@
 package com.example.cabbooking.model;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class Client {
 
     private Integer id;
@@ -10,6 +12,7 @@ public class Client {
 
     //-------------Constructors---------------
     public Client() {};
+
 
     public Client(Integer id, String name, String email, String phone, String address) {
         this.id = id;

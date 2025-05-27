@@ -1,9 +1,8 @@
 package com.example.cabbooking.model;
 
-import com.example.cabbooking.service.MilesDistanceCalculator;
+import org.springframework.beans.factory.annotation.Autowired;
 
-
-class Location {
+public class Location {
     private double latitude;
     private double longitude;
     private String name;
