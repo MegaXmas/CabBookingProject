@@ -5,7 +5,7 @@ import com.example.cabbooking.model.Location;
 
 
 @Service
-public class LocationDistanceCalculator extends DistanceCalculator {
+public class LocationDistanceCalculatorService extends DistanceCalculatorService {
 
     public static double calculateDistance(Location loc1, Location loc2) {
         return calculateDistance(
@@ -15,7 +15,7 @@ public class LocationDistanceCalculator extends DistanceCalculator {
     }
 
 
-    public static void printDistanceReport(Location from, Location to) {
+    public static double printDistanceReport(Location from, Location to) {
         double km = calculateDistance(from, to);
         double miles = kmToMiles(km);
 
@@ -24,6 +24,8 @@ public class LocationDistanceCalculator extends DistanceCalculator {
         System.out.println("To: " + to);
         System.out.printf("Distance: %.2f km (%.2f miles)%n", km, miles);
         System.out.println("=======================");
+
+        return miles;
     }
 }
 

@@ -3,7 +3,7 @@ package com.example.cabbooking.service;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DistanceCalculator {
+public class DistanceCalculatorService {
 
     private static final double EARTH_RADIUS_KM = 6371.0;
 
