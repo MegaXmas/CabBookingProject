@@ -1,14 +1,20 @@
 package com.example.cabbooking.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.cabbooking.model.Location;
 
+import static com.example.cabbooking.service.DistanceCalculatorService.calculateDistance;
+import static com.example.cabbooking.service.DistanceCalculatorService.kmToMiles;
+
 
 @Service
-public class LocationDistanceCalculatorService extends DistanceCalculatorService {
+public class LocationDistanceCalculatorService {
+
+    double miles;
 
     public static double calculateDistance(Location loc1, Location loc2) {
-        return calculateDistance(
+        return DistanceCalculatorService.calculateDistance(
                 loc1.getLatitude(), loc1.getLongitude(),
                 loc2.getLatitude(), loc2.getLongitude()
         );

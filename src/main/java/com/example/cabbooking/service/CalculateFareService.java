@@ -8,8 +8,7 @@ public class CalculateFareService {
     public int dollarsPerMile = 3;
     public int initialBookingFee = 3;
 
-    public double CalculateFare(double miles) {
-
+    public double calculateFare(double miles) {
 
         double cabFare = initialBookingFee + (miles * dollarsPerMile);
         return cabFare;
