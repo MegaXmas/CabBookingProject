@@ -1,6 +1,5 @@
 package com.example.cabbooking.service;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import com.example.cabbooking.model.Location;
 
