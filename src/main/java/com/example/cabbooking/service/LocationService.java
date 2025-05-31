@@ -1,0 +1,45 @@
+package com.example.cabbooking.service;
+
+import com.example.cabbooking.model.Location;
+import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class LocationService {
+
+    private List<Location> locations = new ArrayList<>();
+
+    // Create location using setters (alternative way)
+    public Location createLocationWithSetters(String name, double lat, double lng) {
+        Location location = new Location(); // Empty constructor
+        location.setLocationName(name);     // Use setter
+        location.setLatitude(lat);          // Use setter
+        location.setLongitude(lng);         // Use setter
+        locations.add(location);
+        return location;
+    }
+
+    // Update existing location using setters
+    public Location updateLocation(int index, String newName, double newLat, double newLng) {
+        if (index < locations.size()) {
+            Location location = locations.get(index);
+            location.setLocationName(newName);  // Update with setter
+            location.setLatitude(newLat);
+            location.setLongitude(newLng);
+            return location;
+        }
+        return null;
+    }
+
+    // Get location info using getters
+    public void printLocationInfo(Location location) {
+        System.out.println("Name: " + location.getLocationName());
+        System.out.println("Lat: " + location.getLatitude());
+        System.out.println("Lng: " + location.getLongitude());
+    }
+
+    public List<Location> getAllLocations() {
+        return locations;
+    }
+}

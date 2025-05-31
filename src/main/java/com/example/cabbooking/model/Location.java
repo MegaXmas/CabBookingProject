@@ -1,15 +1,15 @@
 package com.example.cabbooking.model;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 public class Location {
     private double latitude;
     private double longitude;
-    private String name;
+    private String locationName;
+
+    public Location() {}
 
     // Constructor - this runs when we create a new Location
-    public Location(String name, double latitude, double longitude) {
-        this.name = name;
+    public Location(String locationName, double latitude, double longitude) {
+        this.locationName = locationName;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -30,12 +30,12 @@ public class Location {
         this.longitude = longitude;
     }
 
-    public String getName() {
-        return name;
+    public String getLocationName() {
+        return locationName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class Location {
         return "Location{" +
                 "latitude=" + latitude +
                 ", longitude=" + longitude +
-                ", name='" + name + '\'' +
+                ", name='" + locationName + '\'' +
                 '}';
     }
 }
