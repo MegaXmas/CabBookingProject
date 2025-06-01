@@ -28,4 +28,15 @@ public class RouteService {
         return route;
     }
 
+    public Location getRouteLocationFrom(Route route) {
+        return route.getFrom();
+    }
+    public Location getRouteLocationTo(Route route) {
+        return route.getTo();
+    }
+
+    public double getRouteDistance(Route route) {
+        return route.getDistance();
+    }
+
 }

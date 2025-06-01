@@ -2,6 +2,7 @@ package com.example.cabbooking.controller;
 
 import com.example.cabbooking.model.Client;
 import com.example.cabbooking.model.Location;
+import com.example.cabbooking.model.Route;
 import com.example.cabbooking.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,11 +30,10 @@ public class BookingController {
         this.routeService = routeService;
     }
 
-
     @PostMapping
-    public ResponseEntity<Location> bookCab(@RequestBody Client client, Location from, Location to) {
+    public void bookCab(@RequestBody Client client, Route route) {
 
-        bookingService.bookCab(client, from, to);
+        bookingService.bookCab(client, route);
 
     }
 
