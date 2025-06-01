@@ -30,15 +30,6 @@ public class BookingController {
         this.locationDistanceCalculatorService = locationDistanceCalculatorService;
     }
 
-    @PostMapping
-    public void createRoute(@RequestBody String from, double fromLatitude, double fromLongitude,
-                                            String to, double toLatitude, double toLongitude) {
-
-        Location locationFrom = locationService.createLocation(from, fromLatitude, fromLongitude);
-        Location locationTo = locationService.createLocation(to, toLatitude, toLongitude);
-        locationService.printLocationInfo(locationFrom);
-        locationService.printLocationInfo(locationTo);
-    };
 
     @PostMapping
     public ResponseEntity<Location> bookCab(@RequestBody Client client, Location from, Location to) {
