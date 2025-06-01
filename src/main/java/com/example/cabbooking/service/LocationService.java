@@ -10,8 +10,7 @@ public class LocationService {
 
     private List<Location> locations = new ArrayList<>();
 
-    // Create location using setters (alternative way)
-    public Location createLocationWithSetters(String name, double lat, double lng) {
+    public Location createLocation(String name, double lat, double lng) {
         Location location = new Location(); // Empty constructor
         location.setLocationName(name);     // Use setter
         location.setLatitude(lat);          // Use setter
@@ -20,7 +19,6 @@ public class LocationService {
         return location;
     }
 
-    // Update existing location using setters
     public Location updateLocation(int index, String newName, double newLat, double newLng) {
         if (index < locations.size()) {
             Location location = locations.get(index);
@@ -32,7 +30,6 @@ public class LocationService {
         return null;
     }
 
-    // Get location info using getters
     public void printLocationInfo(Location location) {
         System.out.println("Name: " + location.getLocationName());
         System.out.println("Lat: " + location.getLatitude());
