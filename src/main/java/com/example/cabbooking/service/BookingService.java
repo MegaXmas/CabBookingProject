@@ -36,6 +36,7 @@ public class BookingService {
         LocationDistanceCalculatorService.calculateDistance(from, to);
         LocationDistanceCalculatorService.printDistanceReport(from, to);
 
+        routeService.getRouteDistance(route);
         //printDistance returns miles
     }
 

@@ -19,21 +19,25 @@ public class BookingController {
     private final LocationService locationService;
     private final LocationDistanceCalculatorService locationDistanceCalculatorService;
     private final RouteService routeService;
+    private final CalculateFareService calculateFareService;
 
     @Autowired
     public BookingController(BookingService bookingService, ClientService clientService, LocationService locationService,
-                             LocationDistanceCalculatorService locationDistanceCalculatorService, RouteService routeService) {
+                             LocationDistanceCalculatorService locationDistanceCalculatorService, RouteService routeService,
+                             CalculateFareService calculateFareService) {
         this.bookingService = bookingService;
         this.clientService = clientService;
         this.locationService = locationService;
         this.locationDistanceCalculatorService = locationDistanceCalculatorService;
         this.routeService = routeService;
+        this.calculateFareService = calculateFareService;
     }
 
     @PostMapping
     public void bookCab(@RequestBody Client client, Route route) {
 
         bookingService.bookCab(client, route);
+        calculateFareService.calculateFare(route);
 
     }
 

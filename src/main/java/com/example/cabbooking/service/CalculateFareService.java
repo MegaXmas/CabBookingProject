@@ -27,9 +27,12 @@ public class CalculateFareService {
 
     public double calculateFare(Route route) {
 
+        double distance = route.getDistance();
 
+        double cabFare = initialBookingFee + (distance * dollarsPerMile);
 
-        double cabFare = initialBookingFee + (miles * dollarsPerMile);
+        System.out.println("Cab Fare: " + cabFare);
+
         return cabFare;
     }
 
