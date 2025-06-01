@@ -2,10 +2,7 @@ package com.example.cabbooking.controller;
 
 import com.example.cabbooking.model.Client;
 import com.example.cabbooking.model.Location;
-import com.example.cabbooking.service.BookingService;
-import com.example.cabbooking.service.ClientService;
-import com.example.cabbooking.service.LocationDistanceCalculatorService;
-import com.example.cabbooking.service.LocationService;
+import com.example.cabbooking.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +17,16 @@ public class BookingController {
     private final ClientService clientService;
     private final LocationService locationService;
     private final LocationDistanceCalculatorService locationDistanceCalculatorService;
+    private final RouteService routeService;
 
     @Autowired
-    public BookingController(BookingService bookingService, ClientService clientService,
-                             LocationService locationService, LocationDistanceCalculatorService locationDistanceCalculatorService) {
+    public BookingController(BookingService bookingService, ClientService clientService, LocationService locationService,
+                             LocationDistanceCalculatorService locationDistanceCalculatorService, RouteService routeService) {
         this.bookingService = bookingService;
         this.clientService = clientService;
         this.locationService = locationService;
         this.locationDistanceCalculatorService = locationDistanceCalculatorService;
+        this.routeService = routeService;
     }
 
 

@@ -6,11 +6,12 @@ public class Route {
     private Location to;
     private double distance;
 
-    public Route(Location from, Location to, double distance) {
+    public Route(Location from, Location to) {
         this.from = from;
         this.to = to;
-        this.distance = distance;
     }
+
+    public Route() {}
 
     public Location getFrom() {
         return from;
