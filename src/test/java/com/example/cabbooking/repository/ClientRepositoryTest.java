@@ -1,5 +1,6 @@
 package com.example.cabbooking.repository;
 
+import com.example.cabbooking.controller.ClientController;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -7,7 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClientRepositoryTest {
 
     @Test
-    void findAll() {
+    void findAllShouldReturnAllClients() {
+
     }
 
     @Test

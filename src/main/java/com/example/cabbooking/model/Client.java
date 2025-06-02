@@ -2,18 +2,18 @@ package com.example.cabbooking.model;
 
 public class Client {
 
-    private Integer id;
+    private int id;
     private String name;
     private String email;
     private String phone;
     private String address;
-    private Integer credit_card;
+    private String credit_card;
 
     //-------------Constructors---------------
     public Client() {}
 
 
-    public Client(Integer id, String name, String email, String phone, String address, Integer credit_card) {
+    public Client(int id, String name, String email, String phone, String address, String credit_card) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -23,11 +23,11 @@ public class Client {
     }
 
     //------------Getters and Setters-------------
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -63,9 +63,9 @@ public class Client {
         this.address = address;
     }
 
-    public Integer getCredit_card() { return credit_card; }
+    public String getCredit_card() { return credit_card; }
 
-    public void setCredit_card(Integer credit_card) { this.credit_card = credit_card; }
+    public void setCredit_card(String credit_card) { this.credit_card = credit_card; }
 
     @Override
     public String toString() {

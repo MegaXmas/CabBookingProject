@@ -23,9 +23,9 @@ public class PaymentService {
                 calculateFareService.calculateFare(route) + " to finish booking your cab");
     }
 
-    public void paymentConfirmation(Client client, Route route, double paymentAmount, int creditCardNumber) {
+    public void paymentConfirmation(Client client, Route route, double paymentAmount, String creditCardNumber) {
 
-        if (creditCardNumber != client.getCredit_card()) {
+        if (!creditCardNumber.equals(client.getCredit_card())) {
             throw new RuntimeException("invalid credit card number");
         } else if (paymentAmount == calculateFareService.calculateFare(route)) {
             System.out.println("payment from " + client.getName() + " confirmed");

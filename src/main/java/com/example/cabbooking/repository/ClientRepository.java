@@ -28,7 +28,7 @@ public class ClientRepository {
             client.setEmail(rs.getString("email"));
             client.setPhone(rs.getString("phone"));
             client.setAddress(rs.getString("address"));
-            client.setCredit_card(rs.getInt("credit_card"));
+            client.setCredit_card(rs.getString("credit_card"));
             return client;
         }
     }
@@ -37,7 +37,7 @@ public class ClientRepository {
         return jdbcTemplate.query("SELECT id, name, email, phone, address, credit_card FROM clients", new ClientRowMapper());
     }
 
-    public Optional<Client> findById(Integer id) {
+    public Optional<Client> findById(int id) {
         List<Client> clients = jdbcTemplate.query(
             "SELECT id, name, email, phone, address, credit_card FROM clients WHERE id = ?", new ClientRowMapper(), id);
 
@@ -58,7 +58,7 @@ public class ClientRepository {
         System.out.println("Client " + client.getId() + ", " + client.getName() + "updated");
     }
 
-    public void deleteClient(Integer id) {
+    public void deleteClient(int id) {
         jdbcTemplate.update("DELETE FROM clients WHERE id = ?");
 
         System.out.println("Client " + id + " deleted");
