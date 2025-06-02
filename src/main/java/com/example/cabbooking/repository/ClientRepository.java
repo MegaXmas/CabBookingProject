@@ -28,31 +28,32 @@ public class ClientRepository {
             client.setEmail(rs.getString("email"));
             client.setPhone(rs.getString("phone"));
             client.setAddress(rs.getString("address"));
+            client.setCredit_card(rs.getInt("credit_card"));
             return client;
         }
     }
 
     public List<Client> findAll() {
-        return jdbcTemplate.query("SELECT id, name, email, phone, address FROM clients", new ClientRowMapper());
+        return jdbcTemplate.query("SELECT id, name, email, phone, address, credit_card FROM clients", new ClientRowMapper());
     }
 
     public Optional<Client> findById(Integer id) {
         List<Client> clients = jdbcTemplate.query(
-            "SELECT id, name, email, phone, address FROM clients WHERE id = ?", new ClientRowMapper(), id);
+            "SELECT id, name, email, phone, address, credit_card FROM clients WHERE id = ?", new ClientRowMapper(), id);
 
             return clients.isEmpty() ? Optional.empty() : Optional.of(clients.get(0));
     }
 
     public void newClient(Client client) {
-        jdbcTemplate.update("INSERT INTO client (name, email, phone, address) VALUES (?, ?, ?, ?)",
-                client.getId(), client.getName(), client.getEmail(), client.getPhone(), client.getAddress());
+        jdbcTemplate.update("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)",
+                client.getId(), client.getName(), client.getEmail(), client.getPhone(), client.getAddress(), client.getCredit_card());
 
         System.out.println("New client created");
     }
 
     public void updateClient(Client client) {
-        jdbcTemplate.update("UPDATE clients SET name =?, email = ?, phone = ?, address = ? WHERE id = ?",
-                client.getId(), client.getName(), client.getEmail(), client.getPhone(), client.getAddress());
+        jdbcTemplate.update("UPDATE clients SET name =?, email = ?, phone = ?, address = ?, credit_card = ? WHERE id = ?",
+                client.getId(), client.getName(), client.getEmail(), client.getPhone(), client.getAddress(), client.getCredit_card());
 
         System.out.println("Client " + client.getId() + ", " + client.getName() + "updated");
     }
