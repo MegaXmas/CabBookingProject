@@ -9,7 +9,19 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClientTest {
 
     @Test
-    void createNewClient() {
+    public void testDefaultConstructor() {
+        Client client = new Client();
+
+        assertEquals(0, client.getId());
+        assertNull(client.getName());
+        assertNull(client.getEmail());
+        assertNull(client.getPhone());
+        assertNull(client.getAddress());
+        assertNull(client.getCredit_card());
+    }
+
+    @Test
+    void testFullConstructor() {
 
         Client client = new Client(4, "mike", "mikemike@test.com",
                 "4444444444", "4444 mike street", "0404040404040404");
@@ -23,63 +35,84 @@ class ClientTest {
     }
 
     @Test
-    void getClientId() {
+    public void testIdGetterAndSetter() {
+        Client client = new Client();
 
-        Client client = new Client(4, "mike", "mikemike@test.com",
-                "4444444444", "4444 mike street", "0404040404040404");
+        client.setId(42);
 
-        assertEquals(4, client.getId());
-        System.out.println(client);
+        assertEquals(42, client.getId());
     }
 
     @Test
-    void getClientName() {
+    public void testNameGetterAndSetter() {
+        Client client = new Client();
 
-        Client client = new Client(4, "mike", "mikemike@test.com",
-                "4444444444", "4444 mike street", "0404040404040404");
-
-        assertEquals("mike", client.getName());
-        System.out.println(client.getName());
+        client.setName("Jane Smith");
+        assertEquals("Jane Smith", client.getName());
     }
 
     @Test
-    void getClientEmail() {
+    public void testEmailGetterAndSetter() {
+        Client client = new Client();
 
-        Client client = new Client(4, "mike", "mikemike@test.com",
-                "4444444444", "4444 mike street", "0404040404040404");
-
-        assertEquals("mikemike@test.com", client.getEmail());
-        System.out.println(client.getEmail());
+        client.setEmail("jane@test.com");
+        assertEquals("jane@test.com", client.getEmail());
     }
 
     @Test
-    void getClientPhone() {
+    public void testPhoneGetterAndSetter() {
+        Client client = new Client();
 
-        Client client = new Client(4, "mike", "mikemike@test.com",
-                "4444444444", "4444 mike street", "0404040404040404");
-
-        assertEquals("4444444444", client.getPhone());
-        System.out.println(client.getPhone());
+        client.setPhone("555-9876");
+        assertEquals("555-9876", client.getPhone());
     }
 
     @Test
-    void getClientAddress() {
+    public void testAddressGetterAndSetter() {
+        Client client = new Client();
 
-        Client client = new Client(4, "mike", "mikemike@test.com",
-                "4444444444", "4444 mike street", "0404040404040404");
-
-        assertEquals("4444 mike street", client.getAddress());
-        System.out.println(client.getAddress());
+        client.setAddress("456 Oak Ave");
+        assertEquals("456 Oak Ave", client.getAddress());
     }
 
     @Test
-    void getClientCredit_card() {
+    public void testCreditCardGetterAndSetter() {
+        Client client = new Client();
 
-        Client client = new Client(4, "mike", "mikemike@test.com",
-                "4444444444", "4444 mike street", "0404040404040404");
-
+        client.setCredit_card("0404040404040404");
         assertEquals("0404040404040404", client.getCredit_card());
-        System.out.println(client.getCredit_card());
     }
 
+    @Test
+    public void testToString() {
+        Client client = new Client(1, "John Doe", "john@email.com",
+                "555-1234", "123 Main St", "4111-1111-1111-1111");
+
+        String result = client.toString();
+
+        // Check that the string contains all the key information
+        assertTrue(result.contains("id=1"));
+        assertTrue(result.contains("name='John Doe'"));
+        assertTrue(result.contains("email='john@email.com'"));
+        assertTrue(result.contains("phone='555-1234'"));
+        assertTrue(result.contains("address='123 Main St'"));
+        assertTrue(result.contains("credit_card=4111-1111-1111-1111"));
+    }
+
+    // Test edge case: setting null values doesn't break anything
+    @Test
+    public void testNullValues() {
+        Client client = new Client(1, "Test", "test@email.com",
+                "555-0000", "Test Address", "1234-5678");
+
+        // Set fields to null - this should work without errors
+        client.setName(null);
+        client.setEmail(null);
+
+        assertNull(client.getName());
+        assertNull(client.getEmail());
+        // Other fields should remain unchanged
+        assertEquals(1, client.getId());
+        assertEquals("555-0000", client.getPhone());
+    }
 }
