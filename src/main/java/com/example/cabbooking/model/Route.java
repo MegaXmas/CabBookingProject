@@ -6,13 +6,15 @@ public class Route {
     private Location to;
     private double distance;
 
+    //------------Constructors-----------------
+    public Route() {}
+
+
     public Route(Location from, Location to, double distance) {
         this.from = from;
         this.to = to;
         this.distance = distance;
     }
-
-    public Route() {}
 
     //------------Getters and Setters-------------
     public Location getFrom() {

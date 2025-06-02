@@ -8,17 +8,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class CalculateFareService {
 
-    private final DistanceCalculatorService distanceCalculatorService;
-    private final LocationService locationService;
-    private final LocationDistanceCalculatorService locationDistanceCalculatorService;
     private final RouteService routeService;
 
     @Autowired
-    public CalculateFareService(DistanceCalculatorService distanceCalculatorService, LocationService locationService,
-                                LocationDistanceCalculatorService locationDistanceCalculatorService, RouteService routeService) {
-        this.distanceCalculatorService = distanceCalculatorService;
-        this.locationService = locationService;
-        this.locationDistanceCalculatorService = locationDistanceCalculatorService;
+    public CalculateFareService(RouteService routeService) {
         this.routeService = routeService;
     }
 
@@ -35,6 +28,4 @@ public class CalculateFareService {
 
         return cabFare;
     }
-
-
 }

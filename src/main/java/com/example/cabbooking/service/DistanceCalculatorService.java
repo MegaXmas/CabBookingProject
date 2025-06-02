@@ -30,9 +30,8 @@ public class DistanceCalculatorService {
     }
 
     //---------------Kilometers to Miles Conversion----------------
-    public static double kmToMiles(double kilometers) {
+    public double kmToMiles(double kilometers) {
         double miles = kilometers * 0.621371;
         return miles;
     }
-
 }

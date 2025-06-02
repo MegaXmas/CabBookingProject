@@ -11,10 +11,10 @@ public class LocationService {
     private final List<Location> locations = new ArrayList<>();
 
     public Location createLocation(String name, double lat, double lng) {
-        Location location = new Location(); // Empty constructor
-        location.setLocationName(name);     // Use setter
-        location.setLatitude(lat);          // Use setter
-        location.setLongitude(lng);         // Use setter
+        Location location = new Location();
+        location.setLocationName(name);
+        location.setLatitude(lat);
+        location.setLongitude(lng);
         locations.add(location);
         return location;
     }

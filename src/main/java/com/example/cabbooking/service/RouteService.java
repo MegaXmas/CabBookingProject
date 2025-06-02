@@ -8,13 +8,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class RouteService {
 
-    private final LocationService locationService;
     private final LocationDistanceCalculatorService locationDistanceCalculatorService;
 
     @Autowired
-    public RouteService(LocationService locationService,
-                        LocationDistanceCalculatorService locationDistanceCalculatorService) {
-        this.locationService = locationService;
+    public RouteService(LocationDistanceCalculatorService locationDistanceCalculatorService) {
         this.locationDistanceCalculatorService = locationDistanceCalculatorService;
     }
 
@@ -23,7 +20,7 @@ public class RouteService {
         Route route = new Route();
         route.setFrom(from);
         route.setTo(to);
-        route.setDistance(locationDistanceCalculatorService.calculateDistance(from, to));
+        route.setDistance(locationDistanceCalculatorService.calculateDistanceUsingLocation(from, to));
 
         return route;
     }
@@ -38,5 +35,4 @@ public class RouteService {
     public double getRouteDistance(Route route) {
         return route.getDistance();
     }
-
 }

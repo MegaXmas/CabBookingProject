@@ -1,7 +1,5 @@
 package com.example.cabbooking.model;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 public class Client {
 
     private Integer id;

@@ -4,19 +4,16 @@ import com.example.cabbooking.model.Client;
 import com.example.cabbooking.model.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class PaymentService {
 
-    private final RouteService routeService;
     private final CalculateFareService calculateFareService;
     private final BookingService bookingService;
 
     @Autowired
-    PaymentService(RouteService routeService, CalculateFareService calculateFareService,
+    PaymentService(CalculateFareService calculateFareService,
                    BookingService bookingService) {
-        this.routeService = routeService;
         this.calculateFareService = calculateFareService;
         this.bookingService = bookingService;
     }
