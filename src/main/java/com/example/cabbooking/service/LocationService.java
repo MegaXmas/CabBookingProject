@@ -8,7 +8,7 @@ import java.util.List;
 @Service
 public class LocationService {
 
-    private List<Location> locations = new ArrayList<>();
+    private final List<Location> locations = new ArrayList<>();
 
     public Location createLocation(String name, double lat, double lng) {
         Location location = new Location(); // Empty constructor

@@ -5,15 +5,17 @@ public class Location {
     private double longitude;
     private String locationName;
 
+    //-------------Constructors---------------
     public Location() {}
 
-    // Constructor - this runs when we create a new Location
+
     public Location(String locationName, double latitude, double longitude) {
         this.locationName = locationName;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
+    //------------Getters and Setters-------------
     public double getLatitude() {
         return latitude;
     }
