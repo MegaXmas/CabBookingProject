@@ -40,4 +40,10 @@ public class BookingService {
         //printDistance returns miles
     }
 
+    public void finishBookingCab(Client client, Route route) {
+        Location from = routeService.getRouteLocationFrom(route);
+        Location to = routeService.getRouteLocationTo(route);
+        System.out.println("Your cab from " + from + " to " + to + " is booked!" + '\'' +
+                "We hope you enjoy your ride!");
+    }
 }
