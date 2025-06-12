@@ -53,7 +53,7 @@ public class ClientRepository {
 
     public void updateClient(Client client) {
         jdbcTemplate.update("UPDATE clients SET name =?, email = ?, phone = ?, address = ?, credit_card = ? WHERE id = ?",
-                client.getId(), client.getName(), client.getEmail(), client.getPhone(), client.getAddress(), client.getCredit_card());
+                client.getName(), client.getEmail(), client.getPhone(), client.getAddress(), client.getCredit_card(), client.getId());
 
         System.out.println("Client " + client.getId() + ", " + client.getName() + " updated");
     }

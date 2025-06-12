@@ -146,6 +146,23 @@ public class ClientRepositoryTest {
         );
     }
 
+//    @Test
+//    public void testUpdateClientWhenClientNotFound() {
+//        when(jdbcTemplate.update(anyString(),
+//                any(Object.class), any(Object.class), any(Object.class),
+//                any(Object.class), any(Object.class), any(Object.class)))
+//                .thenReturn(1);
+//
+//        // Act
+//        clientRepository.updateClient(null);
+//
+//        // Assert
+//        assertFalse(result.isPresent());
+//
+//        // Verify the query was still called
+//        verify(jdbcTemplate).query(anyString(), any(RowMapper.class), eq(999));
+//    }
+
     // Test that deleteClient calls the correct SQL delete
     @Test
     public void testDeleteClient() {
@@ -193,5 +210,21 @@ public class ClientRepositoryTest {
         verify(jdbcTemplate).update(
                 eq("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)"),
                 isNull(), isNull(), isNull(), isNull(), isNull());
+    }
+
+    @Test
+    public void testNewClientWithSingularNullValue() {
+        Client clientWithNulls = new Client(1, "john", "email@email.com", "111-111-1111", null, "1010101010");
+
+        // Check that update was called with 5 parameters
+        when(jdbcTemplate.update(anyString(),
+                any(), any(), any(), any(), any()))
+                .thenReturn(1);
+
+        clientRepository.newClient(clientWithNulls);
+
+        // Verify it was called (the exact values are less important than the behavior)
+        verify(jdbcTemplate).update(anyString(),
+                any(), any(), any(), any(), any());
     }
 }
