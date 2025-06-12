@@ -114,7 +114,6 @@ public class ClientRepositoryTest {
         // Assert: Verify the insert SQL was called with correct parameters
         verify(jdbcTemplate).update(
                 eq("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)"),
-                eq(testClient.getId()),
                 eq(testClient.getName()),
                 eq(testClient.getEmail()),
                 eq(testClient.getPhone()),

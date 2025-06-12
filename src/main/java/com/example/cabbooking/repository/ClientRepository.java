@@ -46,7 +46,7 @@ public class ClientRepository {
 
     public void newClient(Client client) {
         jdbcTemplate.update("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)",
-                client.getId(), client.getName(), client.getEmail(), client.getPhone(), client.getAddress(), client.getCredit_card());
+                client.getName(), client.getEmail(), client.getPhone(), client.getAddress(), client.getCredit_card());
 
         System.out.println("New client created");
     }
