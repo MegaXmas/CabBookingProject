@@ -1,3 +1,4 @@
+// Updated ClientRepository.java
 package com.example.cabbooking.repository;
 
 import com.example.cabbooking.model.Client;
@@ -19,7 +20,6 @@ public class ClientRepository {
     }
 
     private static class ClientRowMapper implements RowMapper<Client> {
-
         @Override
         public Client mapRow(ResultSet rs, int rowNum) throws SQLException {
             Client client = new Client();
@@ -34,50 +34,131 @@ public class ClientRepository {
     }
 
     public List<Client> findAll() {
-        return jdbcTemplate.query("SELECT id, name, email, phone, address, credit_card FROM clients", new ClientRowMapper());
+        try {
+            List<Client> clients = jdbcTemplate.query(
+                    "SELECT id, name, email, phone, address, credit_card FROM clients",
+                    new ClientRowMapper());
+            System.out.println("✓ Successfully retrieved " + clients.size() + " clients");
+            return clients;
+        } catch (Exception e) {
+            System.out.println("✗ Error retrieving clients: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public Optional<Client> findById(int id) {
-        List<Client> clients = jdbcTemplate.query(
-            "SELECT id, name, email, phone, address, credit_card FROM clients WHERE id = ?", new ClientRowMapper(), id);
+        if (id <= 0) {
+            System.out.println("✗ Error: Invalid client ID " + id);
+            return Optional.empty();
+        }
 
-            return clients.isEmpty() ? Optional.empty() : Optional.of(clients.get(0));
+        try {
+            List<Client> clients = jdbcTemplate.query(
+                    "SELECT id, name, email, phone, address, credit_card FROM clients WHERE id = ?",
+                    new ClientRowMapper(), id);
+
+            if (clients.isEmpty()) {
+                System.out.println("✗ Client with ID " + id + " not found");
+                return Optional.empty();
+            } else {
+                System.out.println("✓ Found client: " + clients.get(0).getName());
+                return Optional.of(clients.get(0));
+            }
+        } catch (Exception e) {
+            System.out.println("✗ Error finding client with ID " + id + ": " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    public void newClient(Client client) {
-        jdbcTemplate.update("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)",
-                client.getName(), client.getEmail(), client.getPhone(), client.getAddress(), client.getCredit_card());
+    public boolean newClient(Client client) {
+        if (client == null) {
+            System.out.println("✗ Error: Cannot create null client");
+            return false;
+        }
 
-        System.out.println("New client created");
+        if (client.getName() == null || client.getName().trim().isEmpty()) {
+            System.out.println("✗ Error: Client name is required");
+            return false;
+        }
+
+        if (client.getEmail() == null || client.getEmail().trim().isEmpty()) {
+            System.out.println("✗ Error: Client email is required");
+            return false;
+        }
+
+        try {
+            int rowsAffected = jdbcTemplate.update(
+                    "INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)",
+                    client.getName(), client.getEmail(), client.getPhone(),
+                    client.getAddress(), client.getCredit_card());
+
+            if (rowsAffected > 0) {
+                System.out.println("✓ New client created: " + client.getName() + " (" + client.getEmail() + ")");
+                return true;
+            } else {
+                System.out.println("✗ Failed to create client");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("✗ Error creating client: " + e.getMessage());
+            return false;
+        }
     }
 
     public boolean updateClient(Client client) {
-        // Guard clause - check for null input
         if (client == null) {
-            System.out.println("Error: Cannot update null client");
+            System.out.println("✗ Error: Cannot update null client");
             return false;
         }
 
-        // Execute the SQL update and capture how many rows were affected
-        int rowsAffected = jdbcTemplate.update(
-                "UPDATE clients SET name =?, email = ?, phone = ?, address = ?, credit_card = ? WHERE id = ?",
-                client.getName(), client.getEmail(), client.getPhone(),
-                client.getAddress(), client.getCredit_card(), client.getId());
+        if (client.getId() <= 0) {
+            System.out.println("✗ Error: Invalid client ID " + client.getId());
+            return false;
+        }
 
-        // Check result and print appropriate message
-        if (rowsAffected > 0) {
-            System.out.println("Client " + client.getId() + " (" + client.getName() + ") updated successfully");
-            return true;
-        } else {
-            System.out.println("Error: Client with ID " + client.getId() + " not found in database");
+        if (client.getName() == null || client.getName().trim().isEmpty()) {
+            System.out.println("✗ Error: Client name is required");
+            return false;
+        }
+
+        try {
+            int rowsAffected = jdbcTemplate.update(
+                    "UPDATE clients SET name = ?, email = ?, phone = ?, address = ?, credit_card = ? WHERE id = ?",
+                    client.getName(), client.getEmail(), client.getPhone(),
+                    client.getAddress(), client.getCredit_card(), client.getId());
+
+            if (rowsAffected > 0) {
+                System.out.println("✓ Client " + client.getId() + " (" + client.getName() + ") updated successfully");
+                return true;
+            } else {
+                System.out.println("✗ Client with ID " + client.getId() + " not found");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("✗ Error updating client: " + e.getMessage());
             return false;
         }
     }
 
-    public void deleteClient(int id) {
-        jdbcTemplate.update("DELETE FROM clients WHERE id = ?", id);
+    public boolean deleteClient(int id) {
+        if (id <= 0) {
+            System.out.println("✗ Error: Invalid client ID " + id);
+            return false;
+        }
 
-        System.out.println("Client " + id + " deleted");
+        try {
+            int rowsAffected = jdbcTemplate.update("DELETE FROM clients WHERE id = ?", id);
 
+            if (rowsAffected > 0) {
+                System.out.println("✓ Client " + id + " deleted successfully");
+                return true;
+            } else {
+                System.out.println("✗ Client with ID " + id + " not found");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("✗ Error deleting client: " + e.getMessage());
+            return false;
+        }
     }
 }

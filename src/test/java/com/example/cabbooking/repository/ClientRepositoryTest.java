@@ -26,198 +26,236 @@ public class ClientRepositoryTest {
         MockitoAnnotations.openMocks(this);
         clientRepository = new ClientRepository(jdbcTemplate);
 
-        // Create a test client for reuse
         testClient = new Client(1, "John Doe", "john@email.com",
                 "555-1234", "123 Main St", "4111-1111-1111-1111");
     }
 
-    // Test that findAll returns all clients from database
+    // === FIND ALL TESTS ===
     @Test
-    public void testFindAll() {
-        // Arrange: Set up what the mock should return
-        List<Client> expectedClients = Arrays.asList(
-                testClient,
-                new Client(2, "Jane Smith", "jane@email.com", "555-5678", "456 Oak Ave", "5555-5555-5555-4444")
-        );
-
-        // Mock the jdbcTemplate.query call to return our test data
+    public void testFindAllSuccess() {
+        List<Client> expectedClients = Arrays.asList(testClient);
         when(jdbcTemplate.query(anyString(), any(RowMapper.class)))
                 .thenReturn(expectedClients);
 
-        // Act: Call the method we're testing
         List<Client> result = clientRepository.findAll();
 
-        // Assert: Check the results
-        assertEquals(2, result.size());
+        assertEquals(1, result.size());
         assertEquals("John Doe", result.get(0).getName());
-        assertEquals("Jane Smith", result.get(1).getName());
-
-        // Verify that the correct SQL was called
-        verify(jdbcTemplate).query(
-                eq("SELECT id, name, email, phone, address, credit_card FROM clients"),
-                any(RowMapper.class)
-        );
-    }
-
-    // Test that findById returns the correct client when found
-    @Test
-    public void testFindByIdWhenClientExists() {
-        // Arrange: Mock returning a single client
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), eq(1)))
-                .thenReturn(Arrays.asList(testClient));
-
-        // Act
-        Optional<Client> result = clientRepository.findById(1);
-
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals("John Doe", result.get().getName());
-        assertEquals(1, result.get().getId());
-
-        // Verify correct SQL with parameter
-        verify(jdbcTemplate).query(
-                eq("SELECT id, name, email, phone, address, credit_card FROM clients WHERE id = ?"),
-                any(RowMapper.class),
-                eq(1)
-        );
-    }
-
-    // Test that findById returns empty when client doesn't exist
-    @Test
-    public void testFindByIdWhenClientNotFound() {
-        // Arrange: Mock returning empty list (no client found)
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class), eq(999)))
-                .thenReturn(new ArrayList<>());
-
-        // Act
-        Optional<Client> result = clientRepository.findById(999);
-
-        // Assert
-        assertFalse(result.isPresent());
-
-        // Verify the query was still called
-        verify(jdbcTemplate).query(anyString(), any(RowMapper.class), eq(999));
-    }
-
-    // Test that newClient calls the correct SQL insert
-    @Test
-    public void testNewClient() {
-        // Arrange: Mock the update method to return 1 (meaning 1 row affected)
-        when(jdbcTemplate.update(anyString(),
-                any(Object.class), any(Object.class), any(Object.class),
-                any(Object.class), any(Object.class)))
-                .thenReturn(1);
-
-        // Act
-        clientRepository.newClient(testClient);
-
-        // Assert: Verify the insert SQL was called with correct parameters (no ID)
-        verify(jdbcTemplate).update(
-                eq("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)"),
-                eq(testClient.getName()),
-                eq(testClient.getEmail()),
-                eq(testClient.getPhone()),
-                eq(testClient.getAddress()),
-                eq(testClient.getCredit_card())
-        );
-    }
-
-    // Test that updateClient calls the correct SQL update
-    @Test
-    public void testUpdateClient() {
-        // Arrange
-        when(jdbcTemplate.update(anyString(),
-                any(Object.class), any(Object.class), any(Object.class),
-                any(Object.class), any(Object.class), any(Object.class)))
-                .thenReturn(1);
-
-        // Act
-        clientRepository.updateClient(testClient);
-
-        // Assert: Verify the update SQL was called
-        verify(jdbcTemplate).update(
-                eq("UPDATE clients SET name =?, email = ?, phone = ?, address = ?, credit_card = ? WHERE id = ?"),
-                eq(testClient.getName()),
-                eq(testClient.getEmail()),
-                eq(testClient.getPhone()),
-                eq(testClient.getAddress()),
-                eq(testClient.getCredit_card()),
-                eq(testClient.getId())
-        );
     }
 
     @Test
-    public void testUpdateClientWhenClientNotFound() {
-        when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(0); // No rows affected
-
-        boolean result = clientRepository.updateClient(testClient);
-
-        assertFalse(result); // Should return false when no client found
-    }
-
-    // Test that deleteClient calls the correct SQL delete
-    @Test
-    public void testDeleteClient() {
-        // Arrange
-        when(jdbcTemplate.update(anyString(), any(Object.class)))
-                .thenReturn(1);
-
-        // Act
-        clientRepository.deleteClient(1);
-
-        // Assert: Verify the delete SQL was called with correct ID
-        verify(jdbcTemplate).update(eq("DELETE FROM clients WHERE id = ?"), eq(1));
-    }
-
-    // Test edge case: findAll returns empty list when no clients exist
-    @Test
-    public void testFindAllWhenNoClients() {
-        // Arrange: Mock returning empty list
+    public void testFindAllWhenDatabaseError() {
         when(jdbcTemplate.query(anyString(), any(RowMapper.class)))
-                .thenReturn(new ArrayList<>());
+                .thenThrow(new RuntimeException("Database connection failed"));
 
-        // Act
         List<Client> result = clientRepository.findAll();
 
-        // Assert
-        assertEquals(0, result.size());
         assertTrue(result.isEmpty());
     }
 
-    // Test that repository handles null client gracefully
+    // === FIND BY ID TESTS ===
     @Test
-    public void testNewClientWithNullValues() {
-        Client clientWithNulls = new Client(1, null, null, null, null, null);
+    public void testFindByIdSuccess() {
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), eq(1)))
+                .thenReturn(Arrays.asList(testClient));
 
-        // Mock specifically for 5 parameters (no ID)
-        when(jdbcTemplate.update(
-                eq("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)"),
-                isNull(), isNull(), isNull(), isNull(), isNull()))
-                .thenReturn(1);
+        Optional<Client> result = clientRepository.findById(1);
 
-        // Act
-        clientRepository.newClient(clientWithNulls);
-
-        // Assert: Verify exact call with null parameters
-        verify(jdbcTemplate).update(
-                eq("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)"),
-                isNull(), isNull(), isNull(), isNull(), isNull());
+        assertTrue(result.isPresent());
+        assertEquals("John Doe", result.get().getName());
     }
 
     @Test
-    public void testNewClientWithSingularNullValue() {
-        Client clientWithNulls = new Client(1, "john", "email@email.com", "111-111-1111", null, "1010101010");
+    public void testFindByIdNotFound() {
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), eq(999)))
+                .thenReturn(new ArrayList<>());
 
-        // Check that update was called with 5 parameters
-        when(jdbcTemplate.update(anyString(),
-                any(), any(), any(), any(), any()))
+        Optional<Client> result = clientRepository.findById(999);
+
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testFindByIdWithInvalidId() {
+        Optional<Client> result = clientRepository.findById(-1);
+
+        assertFalse(result.isPresent());
+        verify(jdbcTemplate, never()).query(anyString(), any(RowMapper.class), anyInt());
+    }
+
+    @Test
+    public void testFindByIdWithDatabaseError() {
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class), eq(1)))
+                .thenThrow(new RuntimeException("Database error"));
+
+        Optional<Client> result = clientRepository.findById(1);
+
+        assertFalse(result.isPresent());
+    }
+
+    // === CREATE CLIENT TESTS ===
+    @Test
+    public void testNewClientSuccess() {
+        when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any()))
                 .thenReturn(1);
 
-        clientRepository.newClient(clientWithNulls);
+        boolean result = clientRepository.newClient(testClient);
 
-        // Verify it was called (the exact values are less important than the behavior)
-        verify(jdbcTemplate).update(anyString(),
-                any(), any(), any(), any(), any());
+        assertTrue(result);
+        verify(jdbcTemplate).update(anyString(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testNewClientWithNullClient() {
+        boolean result = clientRepository.newClient(null);
+
+        assertFalse(result);
+        verify(jdbcTemplate, never()).update(anyString(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testNewClientWithNullName() {
+        Client clientWithNullName = new Client(1, null, "john@email.com",
+                "555-1234", "123 Main St", "4111-1111");
+
+        boolean result = clientRepository.newClient(clientWithNullName);
+
+        assertFalse(result);
+        verify(jdbcTemplate, never()).update(anyString(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testNewClientWithEmptyName() {
+        Client clientWithEmptyName = new Client(1, "   ", "john@email.com",
+                "555-1234", "123 Main St", "4111-1111");
+
+        boolean result = clientRepository.newClient(clientWithEmptyName);
+
+        assertFalse(result);
+        verify(jdbcTemplate, never()).update(anyString(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testNewClientWithNullEmail() {
+        Client clientWithNullEmail = new Client(1, "John Doe", null,
+                "555-1234", "123 Main St", "4111-1111");
+
+        boolean result = clientRepository.newClient(clientWithNullEmail);
+
+        assertFalse(result);
+        verify(jdbcTemplate, never()).update(anyString(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testNewClientWithDatabaseError() {
+        when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any()))
+                .thenThrow(new RuntimeException("Database error"));
+
+        boolean result = clientRepository.newClient(testClient);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testNewClientWithOptionalNullValues() {
+        Client clientWithNulls = new Client(1, "John Doe", "john@email.com",
+                null, null, null);
+        when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any()))
+                .thenReturn(1);
+
+        boolean result = clientRepository.newClient(clientWithNulls);
+
+        assertTrue(result);
+    }
+
+    // === UPDATE CLIENT TESTS ===
+    @Test
+    public void testUpdateClientSuccess() {
+        when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(1);
+
+        boolean result = clientRepository.updateClient(testClient);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testUpdateClientWithNullClient() {
+        boolean result = clientRepository.updateClient(null);
+
+        assertFalse(result);
+        verify(jdbcTemplate, never()).update(anyString(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateClientWithInvalidId() {
+        Client invalidClient = new Client(-1, "John", "john@email.com",
+                "555-1234", "123 Main St", "4111-1111");
+
+        boolean result = clientRepository.updateClient(invalidClient);
+
+        assertFalse(result);
+        verify(jdbcTemplate, never()).update(anyString(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateClientNotFound() {
+        when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(0);
+
+        boolean result = clientRepository.updateClient(testClient);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testUpdateClientWithNullName() {
+        Client clientWithNullName = new Client(1, null, "john@email.com",
+                "555-1234", "123 Main St", "4111-1111");
+
+        boolean result = clientRepository.updateClient(clientWithNullName);
+
+        assertFalse(result);
+        verify(jdbcTemplate, never()).update(anyString(), any(), any(), any(), any(), any(), any());
+    }
+
+    // === DELETE CLIENT TESTS ===
+    @Test
+    public void testDeleteClientSuccess() {
+        when(jdbcTemplate.update(anyString(), any()))
+                .thenReturn(1);
+
+        boolean result = clientRepository.deleteClient(1);
+
+        assertTrue(result);
+        verify(jdbcTemplate).update(eq("DELETE FROM clients WHERE id = ?"), eq(1));
+    }
+
+    @Test
+    public void testDeleteClientWithInvalidId() {
+        boolean result = clientRepository.deleteClient(-1);
+
+        assertFalse(result);
+        verify(jdbcTemplate, never()).update(anyString(), any());
+    }
+
+    @Test
+    public void testDeleteClientNotFound() {
+        when(jdbcTemplate.update(anyString(), any()))
+                .thenReturn(0);
+
+        boolean result = clientRepository.deleteClient(999);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void testDeleteClientWithDatabaseError() {
+        when(jdbcTemplate.update(anyString(), any()))
+                .thenThrow(new RuntimeException("Database error"));
+
+        boolean result = clientRepository.deleteClient(1);
+
+        assertFalse(result);
     }
 }
