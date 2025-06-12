@@ -55,11 +55,11 @@ public class ClientRepository {
         jdbcTemplate.update("UPDATE clients SET name =?, email = ?, phone = ?, address = ?, credit_card = ? WHERE id = ?",
                 client.getId(), client.getName(), client.getEmail(), client.getPhone(), client.getAddress(), client.getCredit_card());
 
-        System.out.println("Client " + client.getId() + ", " + client.getName() + "updated");
+        System.out.println("Client " + client.getId() + ", " + client.getName() + " updated");
     }
 
     public void deleteClient(int id) {
-        jdbcTemplate.update("DELETE FROM clients WHERE id = ?");
+        jdbcTemplate.update("DELETE FROM clients WHERE id = ?", id);
 
         System.out.println("Client " + id + " deleted");
 
