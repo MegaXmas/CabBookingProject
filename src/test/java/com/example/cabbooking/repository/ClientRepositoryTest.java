@@ -111,7 +111,7 @@ public class ClientRepositoryTest {
         // Act
         clientRepository.newClient(testClient);
 
-        // Assert: Verify the insert SQL was called with correct parameters
+        // Assert: Verify the insert SQL was called with correct parameters (no ID)
         verify(jdbcTemplate).update(
                 eq("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)"),
                 eq(testClient.getName()),
@@ -180,17 +180,18 @@ public class ClientRepositoryTest {
     public void testNewClientWithNullValues() {
         Client clientWithNulls = new Client(1, null, null, null, null, null);
 
-        when(jdbcTemplate.update(anyString(),
-                any(Object.class), any(Object.class), any(Object.class),
-                any(Object.class), any(Object.class)))
+        // Mock specifically for 5 parameters (no ID)
+        when(jdbcTemplate.update(
+                eq("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)"),
+                isNull(), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(1);
 
         // Act
         clientRepository.newClient(clientWithNulls);
 
-        // Assert: Should still call update, even with null values
-        verify(jdbcTemplate).update(anyString(),
-                any(Object.class), any(Object.class), any(Object.class),
-                any(Object.class), any(Object.class));
+        // Assert: Verify exact call with null parameters
+        verify(jdbcTemplate).update(
+                eq("INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)"),
+                isNull(), isNull(), isNull(), isNull(), isNull());
     }
 }
