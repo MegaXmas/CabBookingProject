@@ -103,7 +103,9 @@ public class ClientRepositoryTest {
     @Test
     public void testNewClient() {
         // Arrange: Mock the update method to return 1 (meaning 1 row affected)
-        when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any()))
+        when(jdbcTemplate.update(anyString(),
+                any(Object.class), any(Object.class), any(Object.class),
+                any(Object.class), any(Object.class)))
                 .thenReturn(1);
 
         // Act
@@ -125,7 +127,9 @@ public class ClientRepositoryTest {
     @Test
     public void testUpdateClient() {
         // Arrange
-        when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any(), any()))
+        when(jdbcTemplate.update(anyString(),
+                any(Object.class), any(Object.class), any(Object.class),
+                any(Object.class), any(Object.class), any(Object.class)))
                 .thenReturn(1);
 
         // Act
@@ -147,7 +151,7 @@ public class ClientRepositoryTest {
     @Test
     public void testDeleteClient() {
         // Arrange
-        when(jdbcTemplate.update(anyString(), any()))
+        when(jdbcTemplate.update(anyString(), any(Object.class)))
                 .thenReturn(1);
 
         // Act
@@ -177,10 +181,17 @@ public class ClientRepositoryTest {
     public void testNewClientWithNullValues() {
         Client clientWithNulls = new Client(1, null, null, null, null, null);
 
+        when(jdbcTemplate.update(anyString(),
+                any(Object.class), any(Object.class), any(Object.class),
+                any(Object.class), any(Object.class)))
+                .thenReturn(1);
+
         // Act
         clientRepository.newClient(clientWithNulls);
 
         // Assert: Should still call update, even with null values
-        verify(jdbcTemplate).update(anyString(), any(), any(), any(), any(), any(), any());
+        verify(jdbcTemplate).update(anyString(),
+                any(Object.class), any(Object.class), any(Object.class),
+                any(Object.class), any(Object.class));
     }
 }
