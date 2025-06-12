@@ -137,12 +137,12 @@ public class ClientRepositoryTest {
         // Assert: Verify the update SQL was called
         verify(jdbcTemplate).update(
                 eq("UPDATE clients SET name =?, email = ?, phone = ?, address = ?, credit_card = ? WHERE id = ?"),
-                eq(testClient.getId()),
                 eq(testClient.getName()),
                 eq(testClient.getEmail()),
                 eq(testClient.getPhone()),
                 eq(testClient.getAddress()),
-                eq(testClient.getCredit_card())
+                eq(testClient.getCredit_card()),
+                eq(testClient.getId())
         );
     }
 
