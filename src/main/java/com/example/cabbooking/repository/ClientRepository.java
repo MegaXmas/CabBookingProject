@@ -51,11 +51,27 @@ public class ClientRepository {
         System.out.println("New client created");
     }
 
-    public void updateClient(Client client) {
-        jdbcTemplate.update("UPDATE clients SET name =?, email = ?, phone = ?, address = ?, credit_card = ? WHERE id = ?",
-                client.getName(), client.getEmail(), client.getPhone(), client.getAddress(), client.getCredit_card(), client.getId());
+    public boolean updateClient(Client client) {
+        // Guard clause - check for null input
+        if (client == null) {
+            System.out.println("Error: Cannot update null client");
+            return false;
+        }
 
-        System.out.println("Client " + client.getId() + ", " + client.getName() + " updated");
+        // Execute the SQL update and capture how many rows were affected
+        int rowsAffected = jdbcTemplate.update(
+                "UPDATE clients SET name =?, email = ?, phone = ?, address = ?, credit_card = ? WHERE id = ?",
+                client.getName(), client.getEmail(), client.getPhone(),
+                client.getAddress(), client.getCredit_card(), client.getId());
+
+        // Check result and print appropriate message
+        if (rowsAffected > 0) {
+            System.out.println("Client " + client.getId() + " (" + client.getName() + ") updated successfully");
+            return true;
+        } else {
+            System.out.println("Error: Client with ID " + client.getId() + " not found in database");
+            return false;
+        }
     }
 
     public void deleteClient(int id) {

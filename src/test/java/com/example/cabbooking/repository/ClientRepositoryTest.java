@@ -146,22 +146,15 @@ public class ClientRepositoryTest {
         );
     }
 
-//    @Test
-//    public void testUpdateClientWhenClientNotFound() {
-//        when(jdbcTemplate.update(anyString(),
-//                any(Object.class), any(Object.class), any(Object.class),
-//                any(Object.class), any(Object.class), any(Object.class)))
-//                .thenReturn(1);
-//
-//        // Act
-//        clientRepository.updateClient(null);
-//
-//        // Assert
-//        assertFalse(result.isPresent());
-//
-//        // Verify the query was still called
-//        verify(jdbcTemplate).query(anyString(), any(RowMapper.class), eq(999));
-//    }
+    @Test
+    public void testUpdateClientWhenClientNotFound() {
+        when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(0); // No rows affected
+
+        boolean result = clientRepository.updateClient(testClient);
+
+        assertFalse(result); // Should return false when no client found
+    }
 
     // Test that deleteClient calls the correct SQL delete
     @Test
