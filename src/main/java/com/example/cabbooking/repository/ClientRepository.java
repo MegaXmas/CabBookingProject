@@ -48,7 +48,7 @@ public class ClientRepository {
 
     public Optional<Client> findById(int id) {
         if (id <= 0) {
-            System.out.println("✗ Error: Invalid client ID " + id);
+            System.out.println("✗ Error: Invalid client ID: " + id);
             return Optional.empty();
         }
 

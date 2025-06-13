@@ -147,6 +147,17 @@ public class ClientRepositoryTest {
     }
 
     @Test
+    public void testNewClientWithEmptyEmail() {
+        Client clientWithEmptyEmail = new Client(1, "John Doe", " ",
+                "555-1234", "123 Main St", "4111-1111");
+
+        boolean result = clientRepository.newClient(clientWithEmptyEmail);
+
+        assertFalse(result);
+        verify(jdbcTemplate, never()).update(anyString(), any(), any(), any(), any(), any());
+    }
+
+    @Test
     public void testNewClientWithDatabaseError() {
         when(jdbcTemplate.update(anyString(), any(), any(), any(), any(), any()))
                 .thenThrow(new RuntimeException("Database error"));
@@ -219,17 +230,17 @@ public class ClientRepositoryTest {
         verify(jdbcTemplate, never()).update(anyString(), any(), any(), any(), any(), any(), any());
     }
 
-    // === DELETE CLIENT TESTS ===
-//    @Test
-//    public void testDeleteClientSuccess() {
-//        when(jdbcTemplate.update(anyString(), any()))
-//                .thenReturn(1);
-//
-//        boolean result = clientRepository.deleteClient(1);
-//
-//        assertTrue(result);
-//        verify(jdbcTemplate).update(eq("DELETE FROM clients WHERE id = ?"), eq(1));
-//    }
+//     === DELETE CLIENT TESTS ===
+    @Test
+    public void testDeleteClientSuccess() {
+        when(jdbcTemplate.update(anyString(), any()))
+                .thenReturn(1);
+
+        boolean result = clientRepository.deleteClient(1);
+
+        assertTrue(result);
+        verify(jdbcTemplate).update(eq("DELETE FROM clients WHERE id = ?"), eq(1));
+    }
 //
 //    @Test
 //    public void testDeleteClientWithInvalidId() {
