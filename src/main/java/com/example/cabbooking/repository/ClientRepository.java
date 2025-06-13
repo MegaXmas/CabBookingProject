@@ -142,7 +142,7 @@ public class ClientRepository {
 
     public boolean deleteClient(int id) {
         if (id <= 0) {
-            System.out.println("✗ Error: Invalid client ID " + id);
+            System.out.println("✗ Error: Invalid client ID: " + id);
             return false;
         }
 
