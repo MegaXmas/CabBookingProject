@@ -26,14 +26,12 @@ public class ClientService {
       return clientRepository.findById(id);
    }
 
-   public Client addClient(Client client) {
-      clientRepository.newClient(client);
-      return client;
+   public boolean addClient(Client client) {
+      return clientRepository.newClient(client);
    }
 
-   public Client updateClient(Client client) {
-      clientRepository.updateClient(client);
-      return client;
+   public boolean updateClient(Client client) {
+      return clientRepository.updateClient(client);
    }
 
    public void deleteClient(Integer id) {
