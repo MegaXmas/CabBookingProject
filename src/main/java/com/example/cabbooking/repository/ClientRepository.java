@@ -38,17 +38,17 @@ public class ClientRepository {
             List<Client> clients = jdbcTemplate.query(
                     "SELECT id, name, email, phone, address, credit_card FROM clients",
                     new ClientRowMapper());
-            System.out.println("✓ Successfully retrieved " + clients.size() + " clients");
+            System.out.println("✓ Repository: Successfully retrieved " + clients.size() + " clients");
             return clients;
         } catch (Exception e) {
-            System.out.println("✗ Error retrieving clients: " + e.getMessage());
+            System.out.println("✗ Repository: Error retrieving clients: " + e.getMessage());
             return new ArrayList<>();
         }
     }
 
     public Optional<Client> findById(int id) {
         if (id <= 0) {
-            System.out.println("✗ Error: Invalid client ID: " + id);
+            System.out.println("✗ Repository: Error: Invalid client ID: " + id);
             return Optional.empty();
         }
 
@@ -58,31 +58,31 @@ public class ClientRepository {
                     new ClientRowMapper(), id);
 
             if (clients.isEmpty()) {
-                System.out.println("✗ Client with ID " + id + " not found");
+                System.out.println("✗ Repository: Client with ID " + id + " not found");
                 return Optional.empty();
             } else {
-                System.out.println("✓ Found client: " + clients.get(0).getName());
+                System.out.println("✓ Repository: Found client: " + clients.get(0).getName());
                 return Optional.of(clients.get(0));
             }
         } catch (Exception e) {
-            System.out.println("✗ Error finding client with ID " + id + ": " + e.getMessage());
+            System.out.println("✗ Repository: Error finding client with ID " + id + ": " + e.getMessage());
             return Optional.empty();
         }
     }
 
     public boolean newClient(Client client) {
         if (client == null) {
-            System.out.println("✗ Error: Cannot create null client");
+            System.out.println("✗ Repository: Error: Cannot create null client");
             return false;
         }
 
         if (client.getName() == null || client.getName().trim().isEmpty()) {
-            System.out.println("✗ Error: Client name is required");
+            System.out.println("✗ Repository: Error: Client name is required");
             return false;
         }
 
         if (client.getEmail() == null || client.getEmail().trim().isEmpty()) {
-            System.out.println("✗ Error: Client email is required");
+            System.out.println("✗ Repository: Error: Client email is required");
             return false;
         }
 
@@ -93,31 +93,31 @@ public class ClientRepository {
                     client.getAddress(), client.getCredit_card());
 
             if (rowsAffected > 0) {
-                System.out.println("✓ New client created: " + client.getName() + " (" + client.getEmail() + ")");
+                System.out.println("✓ Repository: New client created: " + client.getName() + " (" + client.getEmail() + ")");
                 return true;
             } else {
-                System.out.println("✗ Failed to create client");
+                System.out.println("✗ Repository: Failed to create client");
                 return false;
             }
         } catch (Exception e) {
-            System.out.println("✗ Error creating client: " + e.getMessage());
+            System.out.println("✗ Repository: Error creating client: " + e.getMessage());
             return false;
         }
     }
 
     public boolean updateClient(Client client) {
         if (client == null) {
-            System.out.println("✗ Error: Cannot update null client");
+            System.out.println("✗ Repository: Error: Cannot update null client");
             return false;
         }
 
         if (client.getId() <= 0) {
-            System.out.println("✗ Error: Invalid client ID " + client.getId());
+            System.out.println("✗ Repository: Error: Invalid client ID " + client.getId());
             return false;
         }
 
         if (client.getName() == null || client.getName().trim().isEmpty()) {
-            System.out.println("✗ Error: Client name is required");
+            System.out.println("✗ Repository: Error: Client name is required");
             return false;
         }
 
@@ -128,21 +128,21 @@ public class ClientRepository {
                     client.getAddress(), client.getCredit_card(), client.getId());
 
             if (rowsAffected > 0) {
-                System.out.println("✓ Client " + client.getId() + " (" + client.getName() + ") updated successfully");
+                System.out.println("✓ Repository: Client " + client.getId() + " (" + client.getName() + ") updated successfully");
                 return true;
             } else {
-                System.out.println("✗ Client with ID " + client.getId() + " not found");
+                System.out.println("✗ Repository: Client with ID " + client.getId() + " not found");
                 return false;
             }
         } catch (Exception e) {
-            System.out.println("✗ Error updating client: " + e.getMessage());
+            System.out.println("✗ Repository: Error updating client: " + e.getMessage());
             return false;
         }
     }
 
     public boolean deleteClient(int id) {
         if (id <= 0) {
-            System.out.println("✗ Error: Invalid client ID: " + id);
+            System.out.println("✗ Repository: Error: Invalid client ID: " + id);
             return false;
         }
 
@@ -150,14 +150,14 @@ public class ClientRepository {
             int rowsAffected = jdbcTemplate.update("DELETE FROM clients WHERE id = ?", id);
 
             if (rowsAffected > 0) {
-                System.out.println("✓ Client " + id + " deleted successfully");
+                System.out.println("✓ Repository: Client " + id + " deleted successfully");
                 return true;
             } else {
-                System.out.println("✗ Client with ID " + id + " not found");
+                System.out.println("✗ Repository: Client with ID " + id + " not found");
                 return false;
             }
         } catch (Exception e) {
-            System.out.println("✗ Error deleting client: " + e.getMessage());
+            System.out.println("✗ Repository: Error deleting client: " + e.getMessage());
             return false;
         }
     }

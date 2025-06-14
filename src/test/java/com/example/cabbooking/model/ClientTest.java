@@ -12,7 +12,7 @@ class ClientTest {
     public void testDefaultConstructor() {
         Client client = new Client();
 
-        assertEquals(0, client.getId());
+        assertEquals(null, client.getId());
         assertNull(client.getName());
         assertNull(client.getEmail());
         assertNull(client.getPhone());

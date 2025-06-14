@@ -25,6 +25,7 @@ public class ClientServiceTest {
         MockitoAnnotations.openMocks(this);
         clientService = new ClientService(clientRepository);
 
+        // Updated to use Integer instead of int for ID
         testClient = new Client(1, "John Doe", "john@email.com",
                 "555-1234", "123 Main St", "4111-1111-1111-1111");
     }
@@ -79,7 +80,7 @@ public class ClientServiceTest {
         // Assert
         assertTrue(result.isPresent());
         assertEquals("John Doe", result.get().getName());
-        assertEquals(1, result.get().getId());
+        assertEquals(Integer.valueOf(1), result.get().getId());
 
         // Verify
         verify(clientRepository).findById(1);
@@ -102,17 +103,14 @@ public class ClientServiceTest {
 
     @Test
     public void testGetClientByIdWithNullId() {
-        // Arrange: Mock repository behavior for null (if it handles it)
-        when(clientRepository.findById(null)).thenReturn(Optional.empty());
-
-        // Act
+        // Act: Service handles null without calling repository
         Optional<Client> result = clientService.getClientById(null);
 
         // Assert
         assertFalse(result.isPresent());
 
-        // Verify
-        verify(clientRepository).findById(null);
+        // Verify: Repository should NOT be called with null
+        verify(clientRepository, never()).findById(anyInt());
     }
 
     // === ADD CLIENT TESTS ===
@@ -121,12 +119,11 @@ public class ClientServiceTest {
         // Arrange: Mock repository to return success
         when(clientRepository.newClient(testClient)).thenReturn(true);
 
-        // Act
-        Client result = clientService.addClient(testClient);
+        // Act: Service now returns boolean
+        boolean result = clientService.addClient(testClient);
 
-        // Assert: Service should return the same client
-        assertEquals(testClient, result);
-        assertEquals("John Doe", result.getName());
+        // Assert: Service should return true for success
+        assertTrue(result);
 
         // Verify: Repository method was called
         verify(clientRepository).newClient(testClient);
@@ -137,11 +134,11 @@ public class ClientServiceTest {
         // Arrange: Mock repository to return failure
         when(clientRepository.newClient(testClient)).thenReturn(false);
 
-        // Act: Even if repository fails, service still returns the client
-        Client result = clientService.addClient(testClient);
+        // Act: Service returns false when repository fails
+        boolean result = clientService.addClient(testClient);
 
-        // Assert: Service behavior doesn't change based on repository result
-        assertEquals(testClient, result);
+        // Assert: Service should return false
+        assertFalse(result);
 
         // Verify
         verify(clientRepository).newClient(testClient);
@@ -149,17 +146,14 @@ public class ClientServiceTest {
 
     @Test
     public void testAddClientWithNull() {
-        // Arrange: Mock repository behavior for null
-        when(clientRepository.newClient(null)).thenReturn(false);
+        // Act: Service handles null without calling repository
+        boolean result = clientService.addClient(null);
 
-        // Act
-        Client result = clientService.addClient(null);
+        // Assert: Service returns false for null input
+        assertFalse(result);
 
-        // Assert: Service returns null (the input)
-        assertNull(result);
-
-        // Verify
-        verify(clientRepository).newClient(null);
+        // Verify: Repository should NOT be called
+        verify(clientRepository, never()).newClient(any(Client.class));
     }
 
     // === UPDATE CLIENT TESTS ===
@@ -168,12 +162,11 @@ public class ClientServiceTest {
         // Arrange: Mock repository to return success
         when(clientRepository.updateClient(testClient)).thenReturn(true);
 
-        // Act
-        Client result = clientService.updateClient(testClient);
+        // Act: Service now returns boolean
+        boolean result = clientService.updateClient(testClient);
 
-        // Assert: Service should return the same client
-        assertEquals(testClient, result);
-        assertEquals("John Doe", result.getName());
+        // Assert: Service should return true for success
+        assertTrue(result);
 
         // Verify
         verify(clientRepository).updateClient(testClient);
@@ -184,11 +177,11 @@ public class ClientServiceTest {
         // Arrange: Mock repository to return failure
         when(clientRepository.updateClient(testClient)).thenReturn(false);
 
-        // Act: Service still returns the client even if update failed
-        Client result = clientService.updateClient(testClient);
+        // Act: Service returns false when repository fails
+        boolean result = clientService.updateClient(testClient);
 
         // Assert
-        assertEquals(testClient, result);
+        assertFalse(result);
 
         // Verify
         verify(clientRepository).updateClient(testClient);
@@ -196,17 +189,29 @@ public class ClientServiceTest {
 
     @Test
     public void testUpdateClientWithNull() {
-        // Arrange
-        when(clientRepository.updateClient(null)).thenReturn(false);
-
-        // Act
-        Client result = clientService.updateClient(null);
+        // Act: Service handles null without calling repository
+        boolean result = clientService.updateClient(null);
 
         // Assert
-        assertNull(result);
+        assertFalse(result);
 
-        // Verify
-        verify(clientRepository).updateClient(null);
+        // Verify: Repository should NOT be called
+        verify(clientRepository, never()).updateClient(any(Client.class));
+    }
+
+    @Test
+    public void testUpdateClientWithInvalidId() {
+        // Arrange: Create client with invalid ID (0 or negative)
+        Client invalidClient = new Client(0, "John", "john@email.com", "555-1234", "123 Main St", "4111-1111");
+
+        // Act: Service should reject invalid ID
+        boolean result = clientService.updateClient(invalidClient);
+
+        // Assert
+        assertFalse(result);
+
+        // Verify: Repository should NOT be called
+        verify(clientRepository, never()).updateClient(any(Client.class));
     }
 
     // === DELETE CLIENT TESTS ===
@@ -215,8 +220,11 @@ public class ClientServiceTest {
         // Arrange: Mock repository to return success
         when(clientRepository.deleteClient(1)).thenReturn(true);
 
-        // Act: Method returns void, so just call it
-        clientService.deleteClient(1);
+        // Act: Service now returns boolean
+        boolean result = clientService.deleteClient(1);
+
+        // Assert: Service should return true for success
+        assertTrue(result);
 
         // Verify: Ensure repository method was called
         verify(clientRepository).deleteClient(1);
@@ -227,8 +235,11 @@ public class ClientServiceTest {
         // Arrange: Mock repository to return failure
         when(clientRepository.deleteClient(999)).thenReturn(false);
 
-        // Act: Service doesn't care about the return value
-        clientService.deleteClient(999);
+        // Act: Service returns false when repository fails
+        boolean result = clientService.deleteClient(999);
+
+        // Assert
+        assertFalse(result);
 
         // Verify: Repository was still called
         verify(clientRepository).deleteClient(999);
@@ -236,14 +247,86 @@ public class ClientServiceTest {
 
     @Test
     public void testDeleteClientWithNullId() {
-        // Arrange
-        when(clientRepository.deleteClient(null)).thenReturn(false);
+        // Act: Service handles null without calling repository
+        boolean result = clientService.deleteClient(null);
+
+        // Assert
+        assertFalse(result);
+
+        // Verify: Repository should NOT be called
+        verify(clientRepository, never()).deleteClient(anyInt());
+    }
+
+    @Test
+    public void testDeleteClientWithInvalidId() {
+        // Act: Service should reject invalid ID
+        boolean result = clientService.deleteClient(-1);
+
+        // Assert
+        assertFalse(result);
+
+        // Verify: Repository should NOT be called
+        verify(clientRepository, never()).deleteClient(anyInt());
+    }
+
+    // === UTILITY METHOD TESTS ===
+    @Test
+    public void testClientExistsWhenFound() {
+        // Arrange: Mock repository to return client
+        when(clientRepository.findById(1)).thenReturn(Optional.of(testClient));
 
         // Act
-        clientService.deleteClient(null);
+        boolean result = clientService.clientExists(1);
+
+        // Assert
+        assertTrue(result);
 
         // Verify
-        verify(clientRepository).deleteClient(null);
+        verify(clientRepository).findById(1);
+    }
+
+    @Test
+    public void testClientExistsWhenNotFound() {
+        // Arrange: Mock repository to return empty
+        when(clientRepository.findById(999)).thenReturn(Optional.empty());
+
+        // Act
+        boolean result = clientService.clientExists(999);
+
+        // Assert
+        assertFalse(result);
+
+        // Verify
+        verify(clientRepository).findById(999);
+    }
+
+    @Test
+    public void testClientExistsWithInvalidId() {
+        // Act: Service should handle invalid ID
+        boolean result = clientService.clientExists(-1);
+
+        // Assert
+        assertFalse(result);
+
+        // Verify: Repository should NOT be called
+        verify(clientRepository, never()).findById(anyInt());
+    }
+
+    @Test
+    public void testGetClientCount() {
+        // Arrange: Mock repository to return list of clients
+        List<Client> clients = Arrays.asList(testClient,
+                new Client(2, "Jane", "jane@email.com", "555-5678", "456 Oak Ave", "5555-5555"));
+        when(clientRepository.findAll()).thenReturn(clients);
+
+        // Act
+        int count = clientService.getClientCount();
+
+        // Assert
+        assertEquals(2, count);
+
+        // Verify
+        verify(clientRepository).findAll();
     }
 
     // === INTEGRATION-STYLE TESTS ===
@@ -253,8 +336,8 @@ public class ClientServiceTest {
 
         // 1. Add a client
         when(clientRepository.newClient(testClient)).thenReturn(true);
-        Client addedClient = clientService.addClient(testClient);
-        assertEquals(testClient, addedClient);
+        boolean addResult = clientService.addClient(testClient);
+        assertTrue(addResult);
 
         // 2. Get the client back
         when(clientRepository.findById(1)).thenReturn(Optional.of(testClient));
@@ -264,12 +347,13 @@ public class ClientServiceTest {
         // 3. Update the client
         testClient.setName("John Updated");
         when(clientRepository.updateClient(testClient)).thenReturn(true);
-        Client updatedClient = clientService.updateClient(testClient);
-        assertEquals("John Updated", updatedClient.getName());
+        boolean updateResult = clientService.updateClient(testClient);
+        assertTrue(updateResult);
 
         // 4. Delete the client
         when(clientRepository.deleteClient(1)).thenReturn(true);
-        clientService.deleteClient(1);
+        boolean deleteResult = clientService.deleteClient(1);
+        assertTrue(deleteResult);
 
         // Verify all repository calls were made
         verify(clientRepository).newClient(testClient);
