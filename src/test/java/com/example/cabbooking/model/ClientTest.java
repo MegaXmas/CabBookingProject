@@ -1,7 +1,5 @@
 package com.example.cabbooking.model;
 
-import com.example.cabbooking.model.Client;
-
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +10,7 @@ class ClientTest {
     public void testDefaultConstructor() {
         Client client = new Client();
 
-        assertEquals(null, client.getId());
+        assertNull(client.getId());
         assertNull(client.getName());
         assertNull(client.getEmail());
         assertNull(client.getPhone());
