@@ -59,8 +59,8 @@ public class Location {
 
     @Override
     public String toString() {
-        return String.format("Location{latitude=%.4f, longitude=%.4f, name='%s'}",
-                latitude, longitude, locationName);
+        return String.format("Location {name='%s', latitude=%.4f, longitude=%.4f}",
+                locationName, latitude, longitude);
     }
 }
 

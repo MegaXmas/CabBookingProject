@@ -24,11 +24,24 @@ public class LocationService {
     }
 
     public Location createLocation(String name, double lat, double lng) {
+
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Location name cannot be null or empty");
+        }
+
+        if (!validateCoordinates(lat, lng)) {
+            throw new IllegalArgumentException("Invalid coordinates: latitude must be between -90 and 90, longitude between -180 and 180");
+        }
+
         Location location = new Location();
         location.setLocationName(name);
         location.setLatitude(lat);
         location.setLongitude(lng);
         locations.add(location);
+
+        System.out.println("Location successfully created");
+        System.out.println(location);
+
         return location;
     }
 
@@ -64,11 +77,11 @@ public class LocationService {
 
     // Helper method to validate coordinates
     private boolean validateCoordinates(double latitude, double longitude) {
-        if (latitude < -90.0 || latitude > 90.0) {
+        if (latitude < -90.0 || latitude > 90.0 && Double.isFinite(latitude)) {
             throw new InvalidCoordinateException("Latitude must be between -90 and 90, got: " + latitude);
         }
 
-        if (longitude < -180.0 || longitude > 180.0) {
+        if (longitude < -180.0 || longitude > 180.0 && Double.isFinite(longitude)) {
             throw new InvalidCoordinateException("Longitude must be between -180 and 180, got: " + longitude);
         }
 
