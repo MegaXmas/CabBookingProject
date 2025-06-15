@@ -135,6 +135,80 @@ class LocationServiceTest {
 
         assertEquals("Coordinates cannot be infinite", exception.getMessage());
     }
-    //Test found a bug in exceptions being thrown, invalid coordinates of infinity were being caught by the wrong exception message
+    //^^Test found a bug in exceptions being thrown, invalid coordinates of infinity were being caught by the wrong exception message^^
 
+    // =================== TESTING UPDATE EXCEPTION SCENARIOS ===================
+
+    @Test
+    public void testUpdateLocationWithNullLocation() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> locationService.updateLocation(null, "New Name", 40.7829, -73.9654)
+        );
+
+        assertEquals("Location cannot be null", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateLocationThatDoesNotExist() {
+        // Create a location but don't add it to the service
+        Location orphanLocation = new Location("Orphan", 40.7829, -73.9654);
+
+        LocationService.LocationNotFoundException exception = assertThrows(
+                LocationService.LocationNotFoundException.class,
+                () -> locationService.updateLocation(orphanLocation, "New Name", 40.7800, -73.9600)
+        );
+
+        assertEquals("Location does not exist in the system", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateLocationWithInvalidNewCoordinates() {
+        // First create a valid location
+        Location location = locationService.createLocation("Valid Location", 40.7829, -73.9654);
+
+        // Now try to update it with invalid coordinates
+        LocationService.InvalidCoordinateException exception = assertThrows(
+                LocationService.InvalidCoordinateException.class,
+                () -> locationService.updateLocation(location, "Updated Name", 95.0, -73.9654)
+        );
+
+        assertTrue(exception.getMessage().contains("Latitude must be between -90 and 90"));
+
+        // Verify the original location wasn't changed
+        assertEquals("Valid Location", location.getLocationName());
+        assertEquals(40.7829, location.getLatitude());
+    }
+
+    // =================== TESTING EDGE CASES ===================
+
+    @Test
+    public void testCreateLocationWithBoundaryCoordinates() {
+        // Test exactly at the boundaries (should work)
+        Location northPole = locationService.createLocation("North Pole", 90.0, 0.0);
+        Location southPole = locationService.createLocation("South Pole", -90.0, 0.0);
+        Location dateLine = locationService.createLocation("Date Line", 0.0, 180.0);
+
+        assertNotNull(northPole);
+        assertNotNull(southPole);
+        assertNotNull(dateLine);
+        assertEquals(3, locationService.getAllLocations().size());
+    }
+
+    @Test
+    public void testMultipleLocationOperations() {
+        // Test a sequence of operations to ensure the service maintains state correctly
+        Location loc1 = locationService.createLocation("Location 1", 40.7829, -73.9654);
+        Location loc2 = locationService.createLocation("Location 2", 34.0522, -118.2437);
+
+        assertEquals(2, locationService.getAllLocations().size());
+
+        // Update the first location
+        locationService.updateLocation(loc1, "Updated Location 1", 40.7800, -73.9600);
+
+        // Verify both locations are still there and the update worked
+        assertEquals(2, locationService.getAllLocations().size());
+        assertEquals("Updated Location 1", loc1.getLocationName());
+        assertEquals("Location 2", loc2.getLocationName()); // This shouldn't have changed
+    }
 }
