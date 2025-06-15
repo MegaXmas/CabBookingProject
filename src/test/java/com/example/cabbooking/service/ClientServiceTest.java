@@ -25,7 +25,6 @@ public class ClientServiceTest {
         MockitoAnnotations.openMocks(this);
         clientService = new ClientService(clientRepository);
 
-        // Updated to use Integer instead of int for ID
         testClient = new Client(1, "John Doe", "john@email.com",
                 "555-1234", "123 Main St", "4111-1111-1111-1111");
     }
