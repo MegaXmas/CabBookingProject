@@ -19,13 +19,14 @@ public class LocationService {
         return location;
     }
 
-    public Location updateLocation(int index, String newName, double newLat, double newLng) {
-        if (index < locations.size()) {
-            Location location = locations.get(index);
+    public Location updateLocation(Location location, String newName, double newLat, double newLng) {
+        if (locations.contains(location)) {
             location.setLocationName(newName);  // Update with setter
             location.setLatitude(newLat);
             location.setLongitude(newLng);
             return location;
+        } else {
+            System.out.println("Service: Location does not exist");
         }
         return null;
     }
