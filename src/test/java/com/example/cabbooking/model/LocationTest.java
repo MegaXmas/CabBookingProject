@@ -127,4 +127,55 @@ public class LocationTest {
         assertEquals(-90.0, location.getLatitude());
         assertEquals(-180.0, location.getLongitude());
     }
+
+    // Test that two locations with same values are equal
+    @Test
+    public void testEqualsWithSameValues() {
+        Location location1 = new Location("Central Park", 40.7829, -73.9654);
+        Location location2 = new Location("Central Park", 40.7829, -73.9654);
+
+        // They should be equal even though they're different objects
+        assertEquals(location1, location2);
+        assertTrue(location1.equals(location2));
+    }
+
+    // Test that two locations with different values are not equal
+    @Test
+    public void testEqualsWithDifferentValues() {
+        Location location1 = new Location("Central Park", 40.7829, -73.9654);
+        Location location2 = new Location("Times Square", 40.7580, -73.9855);
+
+        // They should NOT be equal
+        assertNotEquals(location1, location2);
+        assertFalse(location1.equals(location2));
+    }
+
+    // Test equals with null
+    @Test
+    public void testEqualsWithNull() {
+        Location location = new Location("Central Park", 40.7829, -73.9654);
+
+        // Should not be equal to null
+        assertFalse(location.equals(null));
+    }
+
+    // Test that equal objects have the same hash code
+    @Test
+    public void testHashCodeConsistency() {
+        Location location1 = new Location("Central Park", 40.7829, -73.9654);
+        Location location2 = new Location("Central Park", 40.7829, -73.9654);
+
+        // If objects are equal, their hash codes must be equal
+        assertEquals(location1.hashCode(), location2.hashCode());
+    }
+
+    // Test that different objects usually have different hash codes
+    @Test
+    public void testHashCodeDifferent() {
+        Location location1 = new Location("Central Park", 40.7829, -73.9654);
+        Location location2 = new Location("Times Square", 40.7580, -73.9855);
+
+        // Different objects should usually have different hash codes
+        assertNotEquals(location1.hashCode(), location2.hashCode());
+    }
 }

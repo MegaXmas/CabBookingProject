@@ -1,5 +1,7 @@
 package com.example.cabbooking.model;
 
+import java.util.Objects;
+
 public class Location {
 
     private double latitude;
@@ -39,6 +41,20 @@ public class Location {
 
     public void setLocationName(String locationName) {
         this.locationName = locationName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Location location = (Location) o;
+        return Double.compare(latitude, location.latitude) == 0 &&
+                Double.compare(longitude, location.longitude) == 0 &&
+                Objects.equals(locationName, location.locationName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(latitude, longitude, locationName);
     }
 
     @Override

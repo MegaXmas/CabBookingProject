@@ -65,7 +65,7 @@ public class ClientRepository {
                 return Optional.of(clients.get(0));
             }
         } catch (Exception e) {
-            System.out.println("✗ Repository: Error finding client with ID " + id + ": " + e.getMessage());
+            System.out.println("✗ Repository: Error finding client with ID: " + id + ": " + e.getMessage());
             return Optional.empty();
         }
     }
