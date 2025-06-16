@@ -193,6 +193,29 @@ public class RouteTest {
     }
 
     @Test
+    void testEqualsWithNaNDistanceValues() {
+        Route route1 = new Route(startLocation, endLocation, Double.NaN);
+        Route route2 = new Route(startLocation, endLocation, Double.NaN);
+
+        assertTrue(route1.equals(route2));
+    }
+
+    @Test
+    void testEqualsWithInfiniteDistanceValues() {
+        Route route1 = new Route(startLocation, endLocation, Double.POSITIVE_INFINITY);
+        Route route2 = new Route(startLocation, endLocation, Double.POSITIVE_INFINITY);
+
+        assertTrue(route1.equals(route2));
+
+        Route route3 = new Route(startLocation, endLocation, Double.NEGATIVE_INFINITY);
+        Route route4 = new Route(startLocation, endLocation, Double.NEGATIVE_INFINITY);
+
+        assertTrue(route3.equals(route4));
+
+        assertFalse(route1.equals(route3));
+    }
+
+    @Test
     void testEqualsWithNullValues() {
         Route route1 = new Route(null, null, 2.5);
         Route route2 = new Route(null, null, 2.5);
@@ -211,5 +234,39 @@ public class RouteTest {
         assertTrue(route1.equals(route3));
         assertTrue(route2.equals(route3));
         System.out.println(route1 + " " + route2 + " " + route3);
+    }
+
+    @Test
+    void testHashCodeEqualObjectsSameHashCode() {
+        Route route1 = new Route(startLocation, endLocation, 2.5);
+        Route route2 = new Route(startLocation, endLocation, 2.5);
+
+        assertEquals(route1.hashCode(), route2.hashCode());
+    }
+
+    @Test
+    void testHashCodeDifferentObjectsDifferentHashCode() {
+        Route route1 = new Route(startLocation, endLocation, 2.5);
+        Route route2 = new Route(startLocation, endLocation, 2);
+
+        assertNotEquals(route1.hashCode(), route2.hashCode());
+    }
+
+    @Test
+    void testHashCodeWithNullValues() {
+        Route route1 = new Route(null, null, 2.5);
+        Route route2 = new Route(null, null, 2.5);
+
+        assertEquals(route1.hashCode(), route2.hashCode());
+    }
+
+    @Test
+    void testHashCodeConsistency() {
+        Route route1 = new Route(startLocation, endLocation, 2.5);
+
+        int hash1 = route1.hashCode();
+        int hash2 = route1.hashCode();
+
+        assertEquals(hash1, hash2);
     }
 }
