@@ -151,4 +151,65 @@ public class RouteTest {
         route.setDistance(2.123456789);
         assertEquals(2.123456789, route.getDistance());
     }
+
+    @Test
+    public void testEqualsSameObject() {
+        Route route = new Route(startLocation, endLocation, 0.0);
+        assertTrue(route.equals(route));
+    }
+
+    @Test
+    void testEqualsWithSameValues() {
+        Route route1 = new Route(startLocation, endLocation, 2.5);
+        Route route2 = new Route(startLocation, endLocation, 2.5);
+
+        assertTrue(route1.equals(route2));
+        System.out.println(route1 + " " + route2);
+    }
+
+    @Test
+    void testEqualsWithDifferentFromAndToValues() {
+        //Should be false
+
+        Location location1 = new Location("location1", 10.0, 20.0);
+        Location location2 = new Location("location2", 10.0, 20.0);
+
+        Route route1 = new Route(location1, location2, 2.5);
+        Route route2 = new Route(location2, location1, 2.5);
+
+        assertFalse(route1.equals(route2));
+        System.out.println(route1 + " " + route2);
+    }
+
+    @Test
+    void testEqualsWithDifferentDistanceValues() {
+        //should be false
+
+        Route route1 = new Route(startLocation, endLocation, 2.5);
+        Route route2 = new Route(endLocation, startLocation, 23);
+
+        assertFalse(route1.equals(route2));
+        System.out.println(route1 + " " + route2);
+    }
+
+    @Test
+    void testEqualsWithNullValues() {
+        Route route1 = new Route(null, null, 2.5);
+        Route route2 = new Route(null, null, 2.5);
+
+        assertTrue(route1.equals(route2));
+        System.out.println(route1 + " " + route2);
+    }
+
+    @Test
+    void testEqualsTransitive() {
+        Route route1 = new Route(startLocation, endLocation, 2.5);
+        Route route2 = new Route(startLocation, endLocation, 2.5);
+        Route route3 = new Route(startLocation, endLocation, 2.5);
+
+        assertTrue(route1.equals(route2));
+        assertTrue(route1.equals(route3));
+        assertTrue(route2.equals(route3));
+        System.out.println(route1 + " " + route2 + " " + route3);
+    }
 }
