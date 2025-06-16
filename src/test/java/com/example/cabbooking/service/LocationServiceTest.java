@@ -9,16 +9,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class LocationServiceTest {
 
     private LocationService locationService;
-    private Location testLocation;
 
     @BeforeEach
     void setUp() {
         locationService = new LocationService();
-
-        testLocation = new Location();
-        testLocation.setLocationName("Twin Peaks");
-        testLocation.setLatitude(34.2389);
-        testLocation.setLongitude(-117.2336);
     }
 
     // =================== TESTING SUCCESSFUL OPERATIONS ===================
