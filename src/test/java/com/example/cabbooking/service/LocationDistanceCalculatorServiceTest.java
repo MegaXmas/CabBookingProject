@@ -23,7 +23,7 @@ class LocationDistanceCalculatorServiceTest {
     void testCalculateDistanceInKilometersUsingLocation() {
 
         double result = locationDistanceCalculatorService.calculateDistanceUsingLocation(newYork, losAngeles);
-        System.out.println("Distance: " + result + " km");
+        System.out.println("Distance: " + result + " miles");
 
         // This should return the actual calculated distance
         assertEquals(3935.75, result, 0.1); // Allow small margin for precision
@@ -36,7 +36,7 @@ class LocationDistanceCalculatorServiceTest {
 
         // Then - Distance should be 0
         assertEquals(0.0, result, 0.001);
-        System.out.println("Distance: " + result + " km");
+        System.out.println("Distance: " + result + " miles");
     }
 
     @Test
