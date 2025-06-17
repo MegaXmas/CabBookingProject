@@ -10,7 +10,6 @@ public class RouteService {
 
     private final LocationDistanceCalculatorService locationDistanceCalculatorService;
 
-    // ✅ Custom exceptions for route-related problems
     public static class InvalidRouteException extends RuntimeException {
         public InvalidRouteException(String message) {
             super(message);
@@ -29,7 +28,7 @@ public class RouteService {
     }
 
     public Route createRoute(Location from, Location to) {
-        // ✅ Validate inputs with custom exceptions
+
         validateRouteInputs(from, to);
 
         try {
@@ -63,7 +62,6 @@ public class RouteService {
         return route.getDistance();
     }
 
-    // ✅ Helper method to validate route inputs
     private void validateRouteInputs(Location from, Location to) {
         if (from == null) {
             throw new InvalidRouteException("Starting location cannot be null");
@@ -82,7 +80,6 @@ public class RouteService {
         }
     }
 
-    // ✅ Helper method to validate existing route
     private void validateRoute(Route route) {
         if (route == null) {
             throw new InvalidRouteException("Route cannot be null");
