@@ -90,6 +90,27 @@ class RouteServiceTest {
     }
 
     @Test
+    void createRoute0DistanceTest() {
+
+        double mockMiles = 0.0;
+
+        when(locationDistanceCalculatorService.printDistanceReport(startLocation, endLocation))
+                .thenReturn(mockMiles);
+
+        Route route = routeService.createRoute(startLocation, endLocation);
+
+        assertNotNull(route);
+        assertEquals(startLocation, route.getFrom());
+        assertEquals(endLocation, route.getTo());
+        assertEquals(mockMiles, route.getDistance()); // Should work now!
+        System.out.println("Expected miles: " + mockMiles);
+        System.out.println("Actual miles: " + route.getDistance());
+        System.out.println(route);
+
+        verify(locationDistanceCalculatorService).printDistanceReport(startLocation, endLocation);
+    }
+
+    @Test
     void getRouteLocationFromTest() {
         Route route = new Route(startLocation, endLocation, 5.0);
 
