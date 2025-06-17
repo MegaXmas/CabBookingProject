@@ -17,10 +17,15 @@ public class RouteService {
 
     public Route createRoute(Location from, Location to) {
 
+        double miles = locationDistanceCalculatorService.printDistanceReport(from, to);
+
         Route route = new Route();
         route.setFrom(from);
         route.setTo(to);
-        route.setDistance(locationDistanceCalculatorService.calculateDistanceUsingLocation(from, to));
+        route.setDistance(miles);
+
+        System.out.println("Route created");
+        System.out.println(route);
 
         return route;
     }

@@ -1,5 +1,7 @@
 package com.example.cabbooking.model;
 
+import java.util.Objects;
+
 public class Route {
 
     private Location from;
@@ -39,6 +41,27 @@ public class Route {
 
     public void setDistance(double distance) {
         this.distance = distance;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Route route = (Route) o;
+        return Double.compare(distance, route.distance) == 0 && Objects.equals(from, route.from) && Objects.equals(to, route.to);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(from, to, distance);
+    }
+
+    @Override
+    public String toString() {
+        return "Route{" +
+                "from=" + from +
+                ", to=" + to +
+                ", distance=" + distance +
+                '}';
     }
 }
 
