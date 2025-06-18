@@ -70,6 +70,7 @@ class LocationServiceTest {
 
         // Verify no location was created (the list should still be empty)
         assertEquals(0, locationService.getAllLocations().size());
+        System.out.println(exception.getMessage());
     }
 
     @Test
@@ -82,6 +83,7 @@ class LocationServiceTest {
 
         assertEquals("Location name cannot be null or empty", exception.getMessage());
         assertEquals(0, locationService.getAllLocations().size());
+        System.out.println(exception.getMessage());
     }
 
     @Test
@@ -94,6 +96,7 @@ class LocationServiceTest {
 
         assertTrue(exception.getMessage().contains("Latitude must be between -90 and 90"));
         assertEquals(0, locationService.getAllLocations().size());
+        System.out.println(exception.getMessage());
     }
 
     @Test
@@ -106,6 +109,7 @@ class LocationServiceTest {
 
         assertTrue(exception.getMessage().contains("Longitude must be between -180 and 180"));
         assertEquals(0, locationService.getAllLocations().size());
+        System.out.println(exception.getMessage());
     }
 
     @Test
@@ -117,6 +121,7 @@ class LocationServiceTest {
         );
 
         assertEquals("Coordinates cannot be NaN", exception.getMessage());
+        System.out.println(exception.getMessage());
     }
 
     @Test
@@ -128,6 +133,7 @@ class LocationServiceTest {
         );
 
         assertEquals("Coordinates cannot be infinite", exception.getMessage());
+        System.out.println(exception.getMessage());
     }
     //^^Test found a bug in exceptions being thrown, invalid coordinates of infinity were being caught by the wrong exception message^^
 
@@ -141,6 +147,7 @@ class LocationServiceTest {
         );
 
         assertEquals("Location cannot be null", exception.getMessage());
+        System.out.println(exception.getMessage());
     }
 
     @Test
@@ -154,6 +161,7 @@ class LocationServiceTest {
         );
 
         assertEquals("Location does not exist in the system", exception.getMessage());
+        System.out.println(exception.getMessage());
     }
 
     @Test
@@ -168,6 +176,7 @@ class LocationServiceTest {
         );
 
         assertTrue(exception.getMessage().contains("Latitude must be between -90 and 90"));
+        System.out.println(exception.getMessage());
 
         // Verify the original location wasn't changed
         assertEquals("Valid Location", location.getLocationName());
