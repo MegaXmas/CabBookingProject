@@ -88,7 +88,7 @@ public class ClientRepository {
 
         try {
             int rowsAffected = jdbcTemplate.update(
-                    "INSERT INTO client (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO clients (name, email, phone, address, credit_card) VALUES (?, ?, ?, ?, ?)",
                     client.getName(), client.getEmail(), client.getPhone(),
                     client.getAddress(), client.getCredit_card());
 

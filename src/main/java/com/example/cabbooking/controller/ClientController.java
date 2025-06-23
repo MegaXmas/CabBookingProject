@@ -127,6 +127,10 @@ public class ClientController {
             throw new InvalidClientDataException("Client ID must be positive, got: " + id);
         }
 
+        if (id != client.getId()) {
+            throw new InvalidClientDataException("Client ID must be equal to client's ID");
+        }
+
         // Set the ID from the path parameter
         client.setId(id);
 
