@@ -330,6 +330,29 @@ public class ClientControllerTest {
         verify(clientService, never()).updateClient(any(Client.class));
     }
 
+    @Test
+    public void testUpdateClientWithMismatchedIds() {
+        // Arrange: Create a client with ID 999 in the JSON body
+        Client clientWithWrongId = new Client(999, "John Updated", "johnupdated@email.com",
+                "555-9999", "456 New Street", "4111-1111-1111-1111");
+
+        // Act & Assert: Try to update with path parameter ID of 4
+        // This should throw an exception because 999 != 4
+        ClientController.InvalidClientDataException exception = assertThrows(
+                ClientController.InvalidClientDataException.class,
+                () -> clientController.updateClient(4, clientWithWrongId)
+        );
+
+        // Verify the exception message is what we expect
+        assertEquals("Path ID (4) does not match JSON ID (999)", exception.getMessage());
+
+        // Verify that we never checked if client exists or tried to update
+        // because the validation should fail early
+        verify(clientService, never()).clientExists(anyInt());
+        verify(clientService, never()).updateClient(any(Client.class));
+    }
+
+
     // ================= DELETE CLIENT TESTS =================
 
     @Test

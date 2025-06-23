@@ -122,20 +122,22 @@ public class ClientController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Client> updateClient(@PathVariable int id, @RequestBody Client client) {
-        // Validate ID
+        // Validate path ID
         if (id <= 0) {
             throw new InvalidClientDataException("Client ID must be positive, got: " + id);
         }
 
-        if (id != client.getId()) {
-            throw new InvalidClientDataException("Client ID must be equal to client's ID");
+        // Validate client data
+        validateClientData(client);
+
+        if (client.getId() != null && !client.getId().equals(id)) {
+            throw new InvalidClientDataException(
+                    "Path ID (" + id + ") does not match JSON ID (" + client.getId() + ")"
+            );
         }
 
         // Set the ID from the path parameter
         client.setId(id);
-
-        // Validate client data
-        validateClientData(client);
 
         // Check if client exists
         if (!clientService.clientExists(id)) {
