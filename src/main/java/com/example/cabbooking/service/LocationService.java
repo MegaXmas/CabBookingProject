@@ -23,7 +23,9 @@ public class LocationService {
         }
     }
 
-    private void initializeWashingtonDCLocations() {
+    public void initializeWashingtonDCLocations() {
+
+        locations.clear();
 
         // AIRPORTS & TRANSPORTATION HUBS
         // These are super common pickup/dropoff points for cabs
@@ -55,6 +57,22 @@ public class LocationService {
     public List<Location> getAvailableLocations() {
         // We return a copy so the original list stays safe from changes
         return new ArrayList<>(locations);
+    }
+
+    public Location findLocationByName(String locationName) {
+        if (locationName == null || locationName.trim().isEmpty()) {
+            return null;
+        }
+
+        // Search through all locations to find one with matching name
+        for (Location location : locations) {
+            if (location.getLocationName().equals(locationName)) {
+                return location;
+            }
+        }
+
+        // If no location found, return null
+        return null;
     }
 
     public Location createLocation(String name, double lat, double lng) {
