@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Client - Cab Booking</title>
+    <title>Cab Booking</title>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -14,7 +15,8 @@
             <!-- Header -->
             <div class="card shadow">
                 <div class="card-header bg-warning text-black text-center">
-                    <h3><i class="fas fa-user-plus"></i>Book Cab 🚗</h3>
+                    <h3><i class="fas fa-user-plus"></i>🚕 Washington D.C. Cab Service 🚕</h3>
+                    <p class="subtitle">Book your ride to popular D.C. destinations</p>
                 </div>
 
                 <div class="card-body">
@@ -27,41 +29,41 @@
                         <div class="row form-section">
 
                             <div class="col-md-6">
-                            <label for="pickupLocation" class="form-label text-center d-block">Pickup Location</label>
+                                <label for="pickupLocation" class="form-label text-center d-block">Pickup Location</label>
 
-                            <select class="form-select" id="pickupLocation" name="pickupLocation" required>
-                                <option value="">-- Where should we pick you up? --</option>
+                                <select class="form-select text-center" id="pickupLocation" name="pickupLocation" required>
+                                    <option value="">-- Where should we pick you up? --</option>
 
-                                <!-- Transportation -->
-                                <option class="category-header" disabled>✈️ AIRPORTS & TRANSPORTATION</option>
-                                <option value="Ronald Reagan Washington National Airport">🛫 Reagan National Airport</option>
-                                <option value="Washington Dulles International Airport">🛫 Dulles Airport</option>
-                                <option value="Union Station">🚂 Union Station</option>
-                                <option value="Metro Center Station">🚇 Metro Center Station</option>
+                                    <!-- Transportation -->
+                                    <option class="category-header" disabled>✈️ AIRPORTS & TRANSPORTATION</option>
+                                    <option value="Ronald Reagan Washington National Airport">🛫 Reagan National Airport</option>
+                                    <option value="Washington Dulles International Airport">🛫 Dulles Airport</option>
+                                    <option value="Union Station">🚂 Union Station</option>
+                                    <option value="Metro Center Station">🚇 Metro Center Station</option>
 
-                                <!-- Government & Monuments -->
-                                <option class="category-header" disabled>🏛️ GOVERNMENT & MONUMENTS</option>
-                                <option value="The White House">🏛️ The White House</option>
-                                <option value="U.S. Capitol Building">🏛️ U.S. Capitol Building</option>
-                                <option value="Lincoln Memorial">🗽 Lincoln Memorial</option>
-                                <option value="Washington Monument">🗼 Washington Monument</option>
-                                <option value="Jefferson Memorial">🏛️ Jefferson Memorial</option>
-                                <option value="Pentagon">🏢 Pentagon</option>
+                                    <!-- Government & Monuments -->
+                                    <option class="category-header" disabled>🏛️ GOVERNMENT & MONUMENTS</option>
+                                    <option value="The White House">🏛️ The White House</option>
+                                    <option value="U.S. Capitol Building">🏛️ U.S. Capitol Building</option>
+                                    <option value="Lincoln Memorial">🗽 Lincoln Memorial</option>
+                                    <option value="Washington Monument">🗼 Washington Monument</option>
+                                    <option value="Jefferson Memorial">🏛️ Jefferson Memorial</option>
+                                    <option value="Pentagon">🏢 Pentagon</option>
 
-                                <!-- Museums -->
-                                <option class="category-header" disabled>🏛️ MUSEUMS & CULTURE</option>
-                                <option value="Smithsonian National Museum of Natural History">🦕 Natural History Museum</option>
-                                <option value="National Air and Space Museum">🚀 Air and Space Museum</option>
-                                <option value="Kennedy Center">🎭 Kennedy Center</option>
-                                <option value="National Gallery of Art">🎨 National Gallery of Art</option>
-                            </select>
-                        </div>
+                                    <!-- Museums -->
+                                    <option class="category-header" disabled>🏛️ MUSEUMS & CULTURE</option>
+                                    <option value="Smithsonian National Museum of Natural History">🦕 Natural History Museum</option>
+                                    <option value="National Air and Space Museum">🚀 Air and Space Museum</option>
+                                    <option value="Kennedy Center">🎭 Kennedy Center</option>
+                                    <option value="National Gallery of Art">🎨 National Gallery of Art</option>
+                                </select>
+                            </div>
 
                             <!-- To Location -->
                             <div class="col-md-6">
                                 <label for="dropoffLocation" class="form-label text-center d-block">Drop-off Location</label>
 
-                                <select class="form-select" id="dropoffLocation" name="dropoffLocation" required>
+                                <select class="form-select text-center" id="dropoffLocation" name="dropoffLocation" required>
                                     <option value="">-- Where are you going? --</option>
 
                                     <!-- Transportation -->
@@ -90,10 +92,78 @@
                             </div>
                         </div>
 
+                        <!-- Submit Button Section -->
+                        <div class="row mt-4">
+                            <div class="col-12 text-center">
+                                <!-- Main submit button with Bootstrap styling -->
+                                <button type="submit" class="btn btn-success btn-lg px-5 py-3 me-3">
+                                    🚕 Book Your Cab Now! 🚕
+                                </button>
 
-                                <!-- Bootstrap JavaScript -->
+                                <!-- Optional: Reset button to clear the form -->
+                                <button type="reset" class="btn btn-outline-secondary btn-lg px-4 py-3">
+                                    🔄 Clear Form
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Price Estimate Display (initially hidden) -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div id="priceEstimate" class="alert alert-info text-center" style="display: none;">
+                                    <h5>💰 Estimated Fare: <span id="fareAmount">$0.00</span></h5>
+                                    <p class="mb-0">Final price may vary based on traffic and route conditions</p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JavaScript (optional, for enhanced functionality) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Font Awesome for icons -->
-<script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+
+<!-- Simple JavaScript to handle form submission -->
+<script>
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevents the form from actually submitting
+
+        // Get the selected values
+        const pickup = document.getElementById('pickupLocation').value;
+        const dropoff = document.getElementById('dropoffLocation').value;
+
+        // Simple validation
+        if (!pickup || !dropoff) {
+            alert('Please select both pickup and drop-off locations!');
+            return;
+        }
+
+        if (pickup === dropoff) {
+            alert('Pickup and drop-off locations cannot be the same!');
+            return;
+        }
+
+        // Show success message
+        const messageArea = document.getElementById('messageArea');
+        messageArea.innerHTML = `
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>🎉 Booking Confirmed!</strong> Your cab from <em>${pickup}</em> to <em>${dropoff}</em> has been requested.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+
+        // Show estimated price (this would normally come from your backend)
+        const priceEstimate = document.getElementById('priceEstimate');
+        const fareAmount = document.getElementById('fareAmount');
+        fareAmount.textContent = '$' + (Math.random() * 20 + 15).toFixed(2); // Random price between $15-35
+        priceEstimate.style.display = 'block';
+
+        // Scroll to the top to show the message
+        messageArea.scrollIntoView({ behavior: 'smooth' });
+    });
+</script>
 </body>
 </html>
