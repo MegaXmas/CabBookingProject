@@ -23,6 +23,40 @@ public class LocationService {
         }
     }
 
+    private void initializeWashingtonDCLocations() {
+
+        // AIRPORTS & TRANSPORTATION HUBS
+        // These are super common pickup/dropoff points for cabs
+        createLocation("Ronald Reagan Washington National Airport", 38.8512, -77.0402);
+        createLocation("Washington Dulles International Airport", 38.9531, -77.4565);
+        createLocation("Union Station", 38.8973, -77.0063); // Major train station
+        createLocation("Metro Center Station", 38.8983, -77.0281); // Busy subway hub
+
+        // GOVERNMENT & MONUMENTS
+        // Tourists and business people need rides to these constantly
+        createLocation("The White House", 38.8977, -77.0365);
+        createLocation("U.S. Capitol Building", 38.8899, -77.0091);
+        createLocation("Lincoln Memorial", 38.8893, -77.0502);
+        createLocation("Washington Monument", 38.8895, -77.0353);
+        createLocation("Jefferson Memorial", 38.8814, -77.0365);
+        createLocation("Supreme Court", 38.8906, -77.0047);
+        createLocation("Pentagon", 38.8718, -77.0563);
+
+        // MUSEUMS & CULTURAL SITES
+        // Very popular destinations, especially for visitors
+        createLocation("Smithsonian National Museum of Natural History", 38.8913, -77.0261);
+        createLocation("National Air and Space Museum", 38.8882, -77.0199);
+        createLocation("Kennedy Center", 38.8956, -77.0570);
+        createLocation("National Gallery of Art", 38.8913, -77.0200);
+
+        System.out.println("✓ Initialized " + locations.size() + " Washington DC locations for cab service");
+    }
+
+    public List<Location> getAvailableLocations() {
+        // We return a copy so the original list stays safe from changes
+        return new ArrayList<>(locations);
+    }
+
     public Location createLocation(String name, double lat, double lng) {
 
         if (name == null || name.trim().isEmpty()) {
