@@ -96,8 +96,8 @@
                         <div class="row mt-4">
                             <div class="col-12 text-center">
                                 <!-- Main submit button with Bootstrap styling -->
-                                <button type="submit" class="btn btn-success btn-lg px-5 py-3 me-3" id="bookingButton">
-                                    🚕 Calculate Fare & Book! 🚕
+                                <button type="submit" class="btn btn-success btn-lg px-5 py-3 me-3">
+                                    🚕 Book Your Cab Now! 🚕
                                 </button>
 
                                 <!-- Optional: Reset button to clear the form -->
@@ -112,20 +112,7 @@
                             <div class="col-12">
                                 <div id="priceEstimate" class="alert alert-info text-center" style="display: none;">
                                     <h5>💰 Estimated Fare: <span id="fareAmount">$0.00</span></h5>
-                                    <p class="mb-0">Distance: <span id="distanceAmount">0.0</span> km</p>
                                     <p class="mb-0">Final price may vary based on traffic and route conditions</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Loading indicator -->
-                        <div class="row mt-3">
-                            <div class="col-12 text-center">
-                                <div id="loadingIndicator" class="spinner-border text-primary" role="status" style="display: none;">
-                                    <span class="visually-hidden">Calculating fare...</span>
-                                </div>
-                                <div id="loadingText" style="display: none;" class="mt-2">
-                                    <small class="text-muted">Calculating your fare...</small>
                                 </div>
                             </div>
                         </div>
@@ -139,121 +126,43 @@
 <!-- Bootstrap JavaScript (optional, for enhanced functionality) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- JavaScript to handle form submission and communicate with backend -->
+<!-- Simple JavaScript to handle form submission -->
 <script>
-    // This function runs when the form is submitted
     document.getElementById('bookingForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Stop the form from submitting the old way
+        e.preventDefault(); // Prevents the form from actually submitting
 
-        // Get the locations the user selected
+        // Get the selected values
         const pickup = document.getElementById('pickupLocation').value;
         const dropoff = document.getElementById('dropoffLocation').value;
 
-        // Check if user selected both locations
+        // Simple validation
         if (!pickup || !dropoff) {
-            showMessage('Please select both pickup and drop-off locations!', 'error');
+            alert('Please select both pickup and drop-off locations!');
             return;
         }
 
-        // Check if user selected the same location twice
         if (pickup === dropoff) {
-            showMessage('Pickup and drop-off locations cannot be the same!', 'error');
+            alert('Pickup and drop-off locations cannot be the same!');
             return;
         }
 
-        // Show loading animation while we calculate
-        showLoading(true);
-
-        // Create the data to send to our backend
-        const bookingData = {
-            pickupLocation: pickup,
-            dropoffLocation: dropoff
-        };
-
-        // Send the request to our Spring Boot backend
-        fetch('/api/booking/calculate-fare', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(bookingData)
-        })
-            .then(response => {
-                // Check if the request was successful
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json(); // Convert response to JSON
-            })
-            .then(data => {
-                // Hide loading animation
-                showLoading(false);
-
-                // Check if the backend calculation was successful
-                if (data.success) {
-                    // Show success message
-                    showMessage(`🎉 Booking Confirmed! Your cab from ${data.pickupLocation} to ${data.dropoffLocation} has been calculated.`, 'success');
-
-                    // Display the calculated fare
-                    document.getElementById('fareAmount').textContent = '$' + data.fareAmount.toFixed(2);
-                    document.getElementById('distanceAmount').textContent = data.distance.toFixed(2);
-                    document.getElementById('priceEstimate').style.display = 'block';
-
-                    // Scroll to show the results
-                    document.getElementById('messageArea').scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    // Show error if backend couldn't calculate fare
-                    showMessage('Error: ' + data.error, 'error');
-                }
-            })
-            .catch(error => {
-                // Hide loading animation
-                showLoading(false);
-
-                // Show error message if something went wrong
-                console.error('Error:', error);
-                showMessage('Sorry, there was an error calculating your fare. Please try again.', 'error');
-            });
-    });
-
-    // Helper function to show success or error messages
-    function showMessage(message, type) {
+        // Show success message
         const messageArea = document.getElementById('messageArea');
-        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-
         messageArea.innerHTML = `
-        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-            ${message}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>🎉 Booking Confirmed!</strong> Your cab from <em>${pickup}</em> to <em>${dropoff}</em> has been requested.
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     `;
-    }
 
-    // Helper function to show/hide loading animation
-    function showLoading(show) {
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const loadingText = document.getElementById('loadingText');
-        const bookingButton = document.getElementById('bookingButton');
+        // Show estimated price (this would normally come from your backend)
+        const priceEstimate = document.getElementById('priceEstimate');
+        const fareAmount = document.getElementById('fareAmount');
+        fareAmount.textContent = '$' + (Math.random() * 20 + 15).toFixed(2); // Random price between $15-35
+        priceEstimate.style.display = 'block';
 
-        if (show) {
-            loadingIndicator.style.display = 'block';
-            loadingText.style.display = 'block';
-            bookingButton.disabled = true;
-            bookingButton.textContent = 'Calculating...';
-        } else {
-            loadingIndicator.style.display = 'none';
-            loadingText.style.display = 'none';
-            bookingButton.disabled = false;
-            bookingButton.textContent = '🚕 Calculate Fare & Book! 🚕';
-        }
-    }
-
-    // Reset form functionality
-    document.querySelector('button[type="reset"]').addEventListener('click', function() {
-        // Hide price estimate when form is reset
-        document.getElementById('priceEstimate').style.display = 'none';
-        // Clear any messages
-        document.getElementById('messageArea').innerHTML = '';
+        // Scroll to the top to show the message
+        messageArea.scrollIntoView({ behavior: 'smooth' });
     });
 </script>
 </body>

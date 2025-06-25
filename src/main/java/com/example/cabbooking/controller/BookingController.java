@@ -87,7 +87,6 @@ public class BookingController {
             System.out.println("✓ Route created - Distance: " + String.format("%.2f", route.getDistance()) + " km");
 
             // Step 3: Calculate the fare using your existing CalculateFareService
-            // This applies your business rules: $3 base fee + $3 per mile
             double fareAmount = calculateFareService.calculateFare(route);
             System.out.println("✓ Fare calculated: $" + String.format("%.2f", fareAmount));
 
