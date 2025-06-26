@@ -46,3 +46,5 @@ Thumbs.db
 *.tmp
 *.bak
 *.swp
+/src/test/java/com/example/cabbooking/controller/BookingControllerTestClone.java
+/src/test/java/com/example/cabbooking/controller/BookingControllerTestOriginal.java
