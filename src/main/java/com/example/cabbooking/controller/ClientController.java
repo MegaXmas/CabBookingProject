@@ -55,27 +55,27 @@ public class ClientController {
     //====================Exception Handler Methods=======================
     @ExceptionHandler(ClientNotFoundException.class)
     public ResponseEntity<String> handleClientNotFound(ClientNotFoundException e) {
-        return new ResponseEntity<>("❌ " + e.getMessage(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("✗ " + e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ClientCreationException.class)
     public ResponseEntity<String> handleClientCreation(ClientCreationException e) {
-        return new ResponseEntity<>("❌ " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("✗ " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ClientUpdateException.class)
     public ResponseEntity<String> handleClientUpdate(ClientUpdateException e) {
-        return new ResponseEntity<>("❌ " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("✗ " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ClientDeletionException.class)
     public ResponseEntity<String> handleClientDeletion(ClientDeletionException e) {
-        return new ResponseEntity<>("❌ " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("✗ " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidClientDataException.class)
     public ResponseEntity<String> handleInvalidData(InvalidClientDataException e) {
-        return new ResponseEntity<>("❌ " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("✗ " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     //==================API Endpoints with Exception Handling=====================
@@ -87,7 +87,7 @@ public class ClientController {
             List<Client> clients = clientService.getAllClients();
             return new ResponseEntity<>(clients, HttpStatus.OK);
         } catch (Exception e) {
-            throw new RuntimeException("❌ Failed to retrieve clients: " + e.getMessage());
+            throw new RuntimeException("✗ Failed to retrieve clients: " + e.getMessage());
         }
     }
 

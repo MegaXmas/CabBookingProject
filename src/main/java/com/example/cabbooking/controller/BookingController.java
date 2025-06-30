@@ -17,7 +17,7 @@ import java.util.Map;
 @RequestMapping("/booking")
 public class BookingController {
 
-//  ==============SERVICES==============
+    //=============SERVICES==============
     private final BookingService bookingService;
     private final CalculateFareService calculateFareService;
     private final LocationService locationService;
@@ -34,7 +34,7 @@ public class BookingController {
         this.routeService = routeService;
     }
 
-     /** Sets up all the Washington DC locations on start-up */
+    /** Sets up all the Washington DC locations on start-up */
     @PostConstruct
     public void initializeLocations() {
         System.out.println("Setting up Washington DC locations for the booking system...");

@@ -1,4 +1,3 @@
-// Updated ClientRepository.java
 package com.example.cabbooking.repository;
 
 import com.example.cabbooking.model.Client;
@@ -33,6 +32,7 @@ public class ClientRepository {
         }
     }
 
+    /** method which runs a SQL query to find all clients from the database */
     public List<Client> findAll() {
         try {
             List<Client> clients = jdbcTemplate.query(
@@ -46,6 +46,7 @@ public class ClientRepository {
         }
     }
 
+    /** method to run a SQL query which find a client by their id number in the database */
     public Optional<Client> findById(int id) {
         if (id <= 0) {
             System.out.println("✗ Repository: Error: Invalid client ID: " + id);
@@ -70,6 +71,7 @@ public class ClientRepository {
         }
     }
 
+    /** method that runs a SQL query to create a new client in the database */
     public boolean newClient(Client client) {
         if (client == null) {
             System.out.println("✗ Repository: Error: Cannot create null client");
@@ -105,6 +107,7 @@ public class ClientRepository {
         }
     }
 
+    /** method that runs a SQL query to update client information in the database */
     public boolean updateClient(Client client) {
         if (client == null) {
             System.out.println("✗ Repository: Error: Cannot update null client");
@@ -140,6 +143,7 @@ public class ClientRepository {
         }
     }
 
+    /** method that runs a SQL query to delete a client from the database */
     public boolean deleteClient(int id) {
         if (id <= 0) {
             System.out.println("✗ Repository: Error: Invalid client ID: " + id);
