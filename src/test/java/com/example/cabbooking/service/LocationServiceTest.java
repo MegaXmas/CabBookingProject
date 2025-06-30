@@ -8,24 +8,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * This test class demonstrates advanced testing concepts for service layer testing:
- * 1. State-based Testing: We verify that the service maintains correct internal state
- * 2. Behavior Testing: We verify that methods perform the expected actions
- * 3. Integration-style Testing: We test how methods work together
- * 4. Edge Case Testing: We test unusual but possible scenarios
- *
- * Think of this like testing a real-world taxi dispatch system - we need to make sure
- * it can find locations reliably under all kinds of circumstances.
- */
 class LocationServiceTest {
 
     private LocationService locationService;
 
-    /**
-     * Before each test, we create a fresh LocationService
-     * This is like starting each test with a clean slate, ensuring tests don't interfere with each other
-     */
     @BeforeEach
     void setUp() {
         locationService = new LocationService();
@@ -33,22 +19,17 @@ class LocationServiceTest {
 
     // === TESTING THE WASHINGTON DC INITIALIZATION ===
 
-    /**
-     * This test verifies that our Washington DC locations are set up correctly
-     * Think of this like checking that a taxi company has loaded all the major destinations into their system
-     */
     @Test
     public void testInitializeWashingtonDCLocations_LoadsAllExpectedLocations() {
-        // ACT: Initialize the Washington DC locations
+        // ACT: Initialize Washington DC locations
         locationService.initializeWashingtonDCLocations();
 
         // ASSERT: Verify that all expected locations were created
         List<Location> allLocations = locationService.getAllLocations();
 
-        // We expect exactly 14 locations (4 transportation + 7 government + 4 museums)
         assertEquals(15, allLocations.size(), "Should have exactly 15 Washington DC locations");
 
-        // Verify some key locations are present by checking if we can find them by name
+        // Verify some key locations are present by checking they can be found by name
         // This tests both the initialization and the search functionality together
         assertNotNull(locationService.findLocationByName("The White House"),
                 "The White House should be in the system");
@@ -59,13 +40,9 @@ class LocationServiceTest {
         assertNotNull(locationService.findLocationByName("Pentagon"),
                 "Pentagon should be in the system");
 
-        System.out.println("✓ All 14 Washington DC locations loaded successfully");
+        System.out.println("✓ All 15 Washington DC locations loaded successfully");
     }
 
-    /**
-     * This test verifies that locations have realistic coordinates
-     * Washington DC is roughly at latitude 38.9, longitude -77.0
-     */
     @Test
     public void testInitializeWashingtonDCLocations_LocationsHaveRealisticCoordinates() {
         // ACT: Initialize locations
@@ -87,10 +64,6 @@ class LocationServiceTest {
         System.out.println("✓ All locations have realistic Washington DC area coordinates");
     }
 
-    /**
-     * This test verifies that calling initialize multiple times doesn't create duplicates
-     * This is important because in a real application, initialization might be called multiple times
-     */
     @Test
     public void testInitializeWashingtonDCLocations_MultipleCallsDontCreateDuplicates() {
         // ACT: Call initialization multiple times
@@ -116,10 +89,6 @@ class LocationServiceTest {
 
     // === TESTING THE FIND LOCATION BY NAME FUNCTIONALITY ===
 
-    /**
-     * This test verifies that we can find locations by their exact names
-     * This is the core functionality that your web controller depends on
-     */
     @Test
     public void testFindLocationByName_FindsExactMatches() {
         // ARRANGE: Set up the location system
@@ -147,10 +116,6 @@ class LocationServiceTest {
         System.out.println("✓ Successfully found locations by exact name match");
     }
 
-    /**
-     * This test verifies behavior when searching for locations that don't exist
-     * This is crucial for error handling in your web application
-     */
     @Test
     public void testFindLocationByName_ReturnsNullForNonexistentLocations() {
         // ARRANGE: Set up the location system
@@ -170,10 +135,6 @@ class LocationServiceTest {
         System.out.println("✓ Correctly returns null for nonexistent locations");
     }
 
-    /**
-     * This test verifies behavior with invalid search parameters
-     * This protects against common programming errors
-     */
     @Test
     public void testFindLocationByName_HandlesInvalidInput() {
         // ARRANGE: Set up the location system
@@ -193,13 +154,9 @@ class LocationServiceTest {
         System.out.println("✓ Handles invalid input parameters correctly");
     }
 
-    /**
-     * This test verifies that search works correctly even without initialization
-     * This tests the robustness of the search functionality
-     */
     @Test
     public void testFindLocationByName_WorksWithEmptyLocationList() {
-        // Note: We deliberately don't call initializeWashingtonDCLocations() here
+        // Note: Deliberately don't call initializeWashingtonDCLocations()
 
         // ACT & ASSERT: Search in empty location system
         assertNull(locationService.findLocationByName("The White House"),
@@ -213,10 +170,6 @@ class LocationServiceTest {
 
     // === TESTING THE ORIGINAL LOCATION SERVICE FUNCTIONALITY ===
 
-    /**
-     * This test ensures that our new functionality doesn't break the original location creation
-     * This demonstrates backward compatibility testing
-     */
     @Test
     public void testCreateLocation_StillWorksAfterDCInitialization() {
         // ARRANGE: Initialize DC locations first
@@ -232,7 +185,7 @@ class LocationServiceTest {
         assertEquals(dcLocationCount + 1, locationService.getAllLocations().size(),
                 "Should have DC locations plus the new custom location");
 
-        // Verify we can find both DC locations and custom locations
+        // Verify both DC locations and custom locations can be found
         assertNotNull(locationService.findLocationByName("The White House"),
                 "Should still find DC locations");
         assertNotNull(locationService.findLocationByName("Custom Test Location"),
@@ -241,10 +194,6 @@ class LocationServiceTest {
         System.out.println("✓ Original functionality works alongside new DC initialization");
     }
 
-    /**
-     * This test verifies that existing exception handling still works
-     * This ensures our additions don't break the error handling you already built
-     */
     @Test
     public void testCreateLocation_ExceptionHandlingStillWorks() {
         // Test that creating locations with invalid data still throws appropriate exceptions
@@ -269,17 +218,13 @@ class LocationServiceTest {
 
     // === INTEGRATION-STYLE TESTS ===
 
-    /**
-     * This test simulates a realistic workflow that your web application would follow
-     * This demonstrates how all the pieces work together in practice
-     */
     @Test
     public void testRealisticWebApplicationWorkflow() {
-        // STEP 1: Initialize locations (this happens when your application starts)
+        // STEP 1: Initialize locations
         locationService.initializeWashingtonDCLocations();
         System.out.println("Application started, locations loaded");
 
-        // STEP 2: User selects pickup location (this happens when form is submitted)
+        // STEP 2: User selects pickup location
         String userPickupChoice = "The White House";
         Location pickupLocation = locationService.findLocationByName(userPickupChoice);
         assertNotNull(pickupLocation, "User's pickup choice should be found");
@@ -297,7 +242,7 @@ class LocationServiceTest {
         assertTrue(dropoffLocation.getLatitude() != 0.0, "Dropoff location should have real coordinates");
         assertTrue(dropoffLocation.getLongitude() != 0.0, "Dropoff location should have real coordinates");
 
-        // STEP 5: Verify locations are different (users shouldn't book trips to the same place)
+        // STEP 5: Verify locations are different
         assertNotEquals(pickupLocation.getLatitude(), dropoffLocation.getLatitude(),
                 "Pickup and dropoff should have different coordinates");
         assertNotEquals(pickupLocation.getLongitude(), dropoffLocation.getLongitude(),
@@ -306,10 +251,6 @@ class LocationServiceTest {
         System.out.println("✓ Complete web application workflow simulation successful");
     }
 
-    /**
-     * This test verifies performance with the full location dataset
-     * While 14 locations is small, this demonstrates how you'd test performance
-     */
     @Test
     public void testPerformanceWithFullLocationSet() {
         // ARRANGE: Initialize all locations
@@ -336,10 +277,6 @@ class LocationServiceTest {
                 " locations in " + durationMicroseconds + " microseconds");
     }
 
-    /**
-     * This test verifies the completeness of our Washington DC location dataset
-     * This ensures we have good coverage of important DC destinations
-     */
     @Test
     public void testWashingtonDCLocationCompleteness() {
         // ARRANGE: Initialize locations
@@ -403,10 +340,6 @@ class LocationServiceTest {
 
     // === EDGE CASE AND STRESS TESTING ===
 
-    /**
-     * This test verifies behavior with locations that have similar names
-     * This helps ensure search accuracy in real-world scenarios
-     */
     @Test
     public void testLocationSearchAccuracy() {
         // ARRANGE: Initialize locations
@@ -423,7 +356,7 @@ class LocationServiceTest {
         assertNotNull(nationalGallery, "Should find National Gallery");
         assertNotNull(nationalHistory, "Should find Natural History Museum");
 
-        // Verify they are different objects (not the same location returned multiple times)
+        // Verify they are different objects
         assertNotEquals(nationalAirSpace.getLocationName(), nationalGallery.getLocationName());
         assertNotEquals(nationalAirSpace.getLocationName(), nationalHistory.getLocationName());
         assertNotEquals(nationalGallery.getLocationName(), nationalHistory.getLocationName());
@@ -439,10 +372,6 @@ class LocationServiceTest {
         System.out.println("✓ Location search accuracy verified for similar names");
     }
 
-    /**
-     * This test simulates what happens when users make common mistakes
-     * This helps us understand how robust our search is
-     */
     @Test
     public void testCommonUserMistakes() {
         // ARRANGE: Initialize locations
@@ -471,10 +400,6 @@ class LocationServiceTest {
         System.out.println("✓ Confirmed that search requires exact name matches");
     }
 
-    /**
-     * This test verifies that the location system maintains data integrity
-     * This is important for ensuring reliable service operation
-     */
     @Test
     public void testDataIntegrity() {
         // ARRANGE: Initialize locations
