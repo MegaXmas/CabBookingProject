@@ -80,7 +80,10 @@ public class ClientController {
 
     //==================API Endpoints with Exception Handling=====================
 
-    /** API endpoint to get all clients */
+    /**
+     * API endpoint to get all clients
+     * @return List of clients from the database
+     */
     @GetMapping
     public ResponseEntity<List<Client>> getAllClients() {
         try {
@@ -91,7 +94,11 @@ public class ClientController {
         }
     }
 
-    /** API ednpont to get client by id number */
+    /**
+     * API endpoint to get client by id number
+     * @param id ID number of the requested client
+     * @return a JSON of the requested client from the database
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Client> getClientById(@PathVariable int id) {
         // Validate ID
@@ -108,7 +115,11 @@ public class ClientController {
         }
     }
 
-    /** API endpoint to create a client */
+    /**
+     * API endpoint to create a client
+     * @param client Client object to be added to the database
+     * @return JSON of the newly created client added to the database
+     */
     @PostMapping
     public ResponseEntity<Client> createClient(@RequestBody Client client) {
         // Validate client data
@@ -123,7 +134,12 @@ public class ClientController {
         }
     }
 
-    /** API endpoint to update client information */
+    /**
+     * API endpoint to update client information
+     * @param id ID of the client being updated
+     * @param client Client object with new client information
+     * @return JSON of the updated client
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Client> updateClient(@PathVariable int id, @RequestBody Client client) {
         // Validate path ID
@@ -157,7 +173,11 @@ public class ClientController {
         }
     }
 
-    /** API endpoint to delete a client from the database */
+    /**
+     * API endpoint to delete a client from the database
+     * @param id ID of the client who is to be deleted
+     * @return Empty JSON which previously contain the info of the deleted client
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClient(@PathVariable int id) {
         // Validate ID
@@ -179,7 +199,10 @@ public class ClientController {
         }
     }
 
-    /** Helper method to validate client data and throw Exceptions */
+    /**
+     * Helper method to validate client data and throw Exceptions
+     * @param client Client object which is to have its data validated
+     */
     private void validateClientData(Client client) {
         if (client == null) {
             throw new InvalidClientDataException("Client data cannot be null");
