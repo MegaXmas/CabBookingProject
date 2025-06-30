@@ -24,11 +24,9 @@ public class ClientService {
       return clientRepository.findAll();
    }
 
-   /**
-    * Get a client by their ID
+   /** Get a client by their ID
     * @param id The client ID to search for
-    * @return Optional containing the client if found, empty otherwise
-    */
+    * @return Optional containing the client if found, empty otherwise */
    public Optional<Client> getClientById(Integer id) {
       if (id == null) {
          System.out.println("✗ Service Error: Client ID cannot be null");
@@ -37,11 +35,9 @@ public class ClientService {
       return clientRepository.findById(id);
    }
 
-   /**
-    * Add a new client to the database
+   /** Add a new client to the database
     * @param client The client to add
-    * @return true if client was successfully added, false otherwise
-    */
+    * @return true if client was successfully added, false otherwise */
    public boolean addClient(Client client) {
       if (client == null) {
          System.out.println("✗ Service Error: Cannot add null client");
@@ -57,11 +53,9 @@ public class ClientService {
       return success;
    }
 
-   /**
-    * Update an existing client in the database
+   /** Update an existing client in the database
     * @param client The client with updated information
-    * @return true if client was successfully updated, false otherwise
-    */
+    * @return true if client was successfully updated, false otherwise */
    public boolean updateClient(Client client) {
       if (client == null) {
          System.out.println("✗ Service Error: Cannot update null client");
@@ -82,11 +76,9 @@ public class ClientService {
       return success;
    }
 
-   /**
-    * Delete a client from the database
+   /** Delete a client from the database
     * @param id The ID of the client to delete
-    * @return true if client was successfully deleted, false otherwise
-    */
+    * @return true if client was successfully deleted, false otherwise */
    public boolean deleteClient(Integer id) {
       if (id == null) {
          System.out.println("✗ Service Error: Client ID cannot be null");
@@ -107,11 +99,9 @@ public class ClientService {
       return success;
    }
 
-   /**
-    * Check if a client exists in the database
+   /** Check if a client exists in the database
     * @param id The client ID to check
-    * @return true if client exists, false otherwise
-    */
+    * @return true if client exists, false otherwise */
    public boolean clientExists(Integer id) {
       if (id == null || id <= 0) {
          return false;
@@ -119,10 +109,8 @@ public class ClientService {
       return getClientById(id).isPresent();
    }
 
-   /**
-    * Get the total number of clients in the database
-    * @return The count of all clients
-    */
+   /** Get the total number of clients in the database
+    * @return The count of all clients */
    public int getClientCount() {
       List<Client> clients = getAllClients();
       return clients.size();

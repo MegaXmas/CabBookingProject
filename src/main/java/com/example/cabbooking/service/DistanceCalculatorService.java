@@ -7,6 +7,11 @@ public class DistanceCalculatorService {
 
     private static final double EARTH_RADIUS_KM = 6371.0;
 
+    /**
+     * method to run the Haversine Formula, which calculates
+     * the distance between two locations using their latitude and longitude
+     * @return The distance between the two locations in kilometers
+     * */
     public static double calculateDistance(double lat1, double lon1,
                                            double lat2, double lon2) {
 
@@ -29,7 +34,12 @@ public class DistanceCalculatorService {
         return kilometers;
     }
 
-    //---------------Kilometers to Miles Conversion----------------
+    /**
+     * method which converts kilometers to miles
+     * (will run after calculateDistance() and use the returned kilometers variable)
+     * @param kilometers Kilometers delivered from calculateDistance() to be converted into miles
+     * @return The conversion of kilometers to miles
+     */
     public static double kmToMiles(double kilometers) {
         double miles = kilometers * 0.621371;
         return miles;

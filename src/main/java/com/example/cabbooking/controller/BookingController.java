@@ -34,7 +34,9 @@ public class BookingController {
         this.routeService = routeService;
     }
 
-    /** Sets up all the Washington DC locations on start-up */
+    /**
+     * Sets up all the Washington DC locations on start-up
+     */
     @PostConstruct
     public void initializeLocations() {
         System.out.println("Setting up Washington DC locations for the booking system...");
@@ -42,14 +44,20 @@ public class BookingController {
         System.out.println("Location setup complete! Ready for bookings.");
     }
 
-    /** Booking endpoint */
+    /**
+     * Booking endpoint
+     */
     @PostMapping
     public void bookCab(@RequestBody Client client, Route route) {
         bookingService.bookCab(client, route);
         calculateFareService.calculateFare(route);
     }
 
-    /** Web-based fare calculation endpoint for HTML form */
+    /**
+     * Web-based fare calculation endpoint for HTML form
+     * @param request the JSON delivered from the HTML request
+     * @return HashMap of the booking request send from the HTML
+     */
     @PostMapping("/calculate-fare")
     public ResponseEntity<Map<String, Object>> calculateWebBookingFare(@RequestBody WebBookingRequest request) {
         try {
@@ -104,7 +112,10 @@ public class BookingController {
         }
     }
 
-    /** API endpoint to get all available locations */
+    /**
+     * API endpoint to get all available locations
+     * @return List of location objects
+     */
     @GetMapping("/locations")
     public ResponseEntity<List<Location>> getAllLocations() {
         try {
@@ -117,7 +128,11 @@ public class BookingController {
         }
     }
 
-    /** Helper method to create consistent error responses for the web client */
+    /**
+     * Helper method to create consistent error responses for the web client
+     * @param errorMessage Error message to be created
+     * @return Generated error message
+     */
     private Map<String, Object> createErrorResponse(String errorMessage) {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("success", false);
@@ -128,6 +143,8 @@ public class BookingController {
     /**
      * Test booking endpoint that accepts a pre-made client and route information
      * This allows the frontend to send a complete booking without requiring user registration
+     * @param request the JSON delivered from the HTML request
+     * @return HashMap of the booking request send from the HTML
      */
     @PostMapping("/test-booking")
     public ResponseEntity<Map<String, Object>> testBooking(@RequestBody TestBookingRequest request) {
@@ -176,7 +193,9 @@ public class BookingController {
         }
     }
 
-    /** Simple data class to receive the test booking request */
+    /**
+     * Simple data class to receive the test booking request
+     */
     public static class TestBookingRequest {
         private TestClient client;
         private String pickupLocation;
@@ -194,7 +213,9 @@ public class BookingController {
         public String getDropoffLocation() { return dropoffLocation; }
         public void setDropoffLocation(String dropoffLocation) { this.dropoffLocation = dropoffLocation; }
 
-        /** Inner class to match the test client structure from frontend */
+        /**
+         * Inner class to match the test client structure from frontend
+         */
         public static class TestClient {
             private Integer id;
             private String name;
@@ -235,8 +256,10 @@ public class BookingController {
         }
     }
 
-    /** Inner class to represent the booking request coming from the HTML form
-     *  and methods to covert JSON */
+    /**
+     * Inner class to represent the booking request coming from the HTML form
+     * and methods to covert JSON
+     */
     public static class WebBookingRequest {
         private String pickupLocation;
         private String dropoffLocation;
