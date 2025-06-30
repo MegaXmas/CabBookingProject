@@ -9,7 +9,7 @@ public class Client {
     private String address;
     private String credit_card;
 
-    //-------------Constructors---------------
+    //==================-Constructors===================
     public Client() {}
 
 
@@ -22,11 +22,10 @@ public class Client {
         this.credit_card = credit_card;
     }
 
-    //------------Getters and Setters-------------
+    //===================Getters and Setters===================
     public Integer getId() {
         return id;
     }
-
     public void setId(Integer id) {
         this.id = id;
     }
@@ -34,7 +33,6 @@ public class Client {
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -42,7 +40,6 @@ public class Client {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }
@@ -50,7 +47,6 @@ public class Client {
     public String getPhone() {
         return phone;
     }
-
     public void setPhone(String phone) {
         this.phone = phone;
     }
@@ -58,14 +54,13 @@ public class Client {
     public String getAddress() {
         return address;
     }
-
     public void setAddress(String address) {
         this.address = address;
     }
 
     public String getCredit_card() { return credit_card; }
-
     public void setCredit_card(String credit_card) { this.credit_card = credit_card; }
+
 
     @Override
     public String toString() {
