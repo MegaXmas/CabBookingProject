@@ -26,8 +26,6 @@ import static org.mockito.Mockito.*;
  */
 public class BookingControllerTest {
 
-    // Mock objects are like stunt doubles for our real services
-    // They look like the real thing, but we can control exactly what they do
     @Mock
     private BookingService bookingService;
 
@@ -40,26 +38,19 @@ public class BookingControllerTest {
     @Mock
     private RouteService routeService;
 
-    // The actual controller we're testing - this is the "actor" in our test "movie"
     private BookingController bookingController;
 
-    // Test data that represents realistic scenarios
     private Location whiteHouse;
     private Location lincolnMemorial;
     private Route testRoute;
     private Client testClient;
 
-    /**
-     * This method runs before each test, setting up our "test stage"
-     * Think of it like setting up props before each scene in a play
-     */
     @BeforeEach
     public void setUp() {
-        // Initialize our mocks (creates the stunt doubles)
+        // Initialize the mocks
         MockitoAnnotations.openMocks(this);
 
-        // Create our controller with the mock dependencies
-        // This is like assembling our test subject with controlled parts
+        // Create the controller with the mock dependencies
         bookingController = new BookingController(
                 bookingService,
                 calculateFareService,
@@ -68,11 +59,10 @@ public class BookingControllerTest {
         );
 
         // Set up realistic test data
-        // These represent real locations someone might actually select
         whiteHouse = new Location("The White House", 38.8977, -77.0365);
         lincolnMemorial = new Location("Lincoln Memorial", 38.8893, -77.0502);
 
-        // Create a route between these locations (distance would be calculated in real service)
+        // Create a route between these locations
         testRoute = new Route(whiteHouse, lincolnMemorial, 2.5); // 2.5 km distance
 
         // Create a test client for the original booking method
@@ -80,19 +70,15 @@ public class BookingControllerTest {
                 "555-1234", "123 Main St", "4111-1111-1111-1111");
     }
 
-    // === TESTING THE NEW WEB BOOKING FUNCTIONALITY ===
+    // === TESTING WEB BOOKING FUNCTIONALITY ===
 
-    /**
-     * This tests the happy path - when everything works perfectly
-     * This is like testing that a well-rehearsed dance routine goes smoothly
-     */
     @Test
     public void testCalculateWebBookingFare_Success() {
 
         when(locationService.findLocationByName("The White House")).thenReturn(whiteHouse);
         when(locationService.findLocationByName("Lincoln Memorial")).thenReturn(lincolnMemorial);
 
-        // Mock the route service to return our test route
+        // Mock the route service to return the test route
         when(routeService.createRoute(whiteHouse, lincolnMemorial)).thenReturn(testRoute);
 
         // Mock the fare calculation ($3 base + $3/mile)
@@ -109,7 +95,7 @@ public class BookingControllerTest {
 
         // ASSERT: Verify everything worked as expected
 
-        // Check that we got a successful HTTP response
+        // Verify a successful HTTP response
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
         // Get the response body to examine the details
@@ -123,8 +109,7 @@ public class BookingControllerTest {
         assertEquals(2.5, responseBody.get("distance"));
         assertEquals(7.65, responseBody.get("fareAmount"));
 
-        // VERIFY: Make sure our services were called correctly
-        // This ensures the controller is orchestrating the services properly
+        // VERIFY: Make sure the services were called correctly
         verify(locationService).findLocationByName("The White House");
         verify(locationService).findLocationByName("Lincoln Memorial");
         verify(routeService).createRoute(whiteHouse, lincolnMemorial);
@@ -133,10 +118,6 @@ public class BookingControllerTest {
         System.out.println(responseBody);
     }
 
-    /**
-     * This tests what happens when a location isn't found
-     * This is like testing what happens when an actor forgets their lines
-     */
     @Test
     public void testCalculateWebBookingFare_PickupLocationNotFound() {
         // ARRANGE: Set up a scenario where the pickup location doesn't exist
@@ -163,9 +144,6 @@ public class BookingControllerTest {
         verify(calculateFareService, never()).calculateFare(any());
     }
 
-    /**
-     * This tests what happens when the dropoff location isn't found
-     */
     @Test
     public void testCalculateWebBookingFare_DropoffLocationNotFound() {
         // ARRANGE: Valid pickup, invalid dropoff
@@ -187,10 +165,6 @@ public class BookingControllerTest {
         System.out.println(responseBody);
     }
 
-    /**
-     * This tests what happens when the fare calculation service throws an exception
-     * This simulates unexpected errors, like a database connection failing
-     */
     @Test
     public void testCalculateWebBookingFare_ServiceException() {
         // ARRANGE: Set up scenario where everything looks good but fare calculation fails
@@ -220,10 +194,6 @@ public class BookingControllerTest {
 
     // === TESTING THE GET LOCATIONS FUNCTIONALITY ===
 
-    /**
-     * This tests the endpoint that returns all available locations
-     * This would be used if you wanted to dynamically populate your dropdown menus
-     */
     @Test
     public void testGetAllLocations_Success() {
         // ARRANGE: Create a list of locations that the service would return
@@ -247,9 +217,6 @@ public class BookingControllerTest {
         System.out.println(responseBody);
     }
 
-    /**
-     * This tests what happens when the location service fails
-     */
     @Test
     public void testGetAllLocations_ServiceException() {
         // ARRANGE: Simulate the location service throwing an exception
@@ -265,10 +232,6 @@ public class BookingControllerTest {
 
     // === TESTING THE ORIGINAL BOOKING FUNCTIONALITY ===
 
-    /**
-     * This tests your original bookCab method to ensure it still works
-     * This demonstrates backward compatibility - new features don't break old ones
-     */
     @Test
     public void testBookCab_OriginalFunctionality() {
         // ARRANGE: Set up the original booking scenario
@@ -287,10 +250,6 @@ public class BookingControllerTest {
 
     // === TESTING EDGE CASES AND DATA VALIDATION ===
 
-    /**
-     * This tests the WebBookingRequest class to ensure it handles data correctly
-     * Testing data classes might seem boring, but they're crucial for web applications
-     */
     @Test
     public void testWebBookingRequest_DataHandling() {
         // Test the default constructor
@@ -317,10 +276,6 @@ public class BookingControllerTest {
         assertTrue(stringRepresentation.contains("Test Dropoff"));
     }
 
-    /**
-     * This tests various edge cases that might occur in real usage
-     * Edge cases are the unusual scenarios that often cause bugs
-     */
     @Test
     public void testCalculateWebBookingFare_EdgeCases() {
         // Test with locations that have the same name (should work fine)
@@ -344,31 +299,23 @@ public class BookingControllerTest {
         assertEquals(3.0, responseBody.get("fareAmount")); // Just the base booking fee
     }
 
-    // ===============================================================================
-    // TESTING THE NEW TEST BOOKING FUNCTIONALITY
-    // These tests verify that your test client integration works correctly
-    // This is where we test the complete flow from HTML form to bookingService.bookCab()
-    // ===============================================================================
+    // =============TESTING THE TEST BOOKING FUNCTIONALITY===========
 
     /**
-     * This tests the complete test booking flow - the happy path scenario
-     * This is like testing that your entire restaurant can serve a meal from order to delivery
-     *
-     * The key insight here is that we're testing INTEGRATION between multiple services:
+     * This tests the complete test booking flow INTEGRATION between multiple services:
      * - LocationService finds the locations
      * - RouteService creates the route
      * - CalculateFareService calculates the fare
      * - BookingService actually books the cab
      *
-     * This test verifies that all these services work together correctly when called
-     * through your new test booking endpoint
+     * Verifies that all these services work together correctly when called
+     * through the test booking endpoint
      */
     @Test
     public void testTestBooking_CompleteFlowSuccess() {
         System.out.println("=== Testing Complete Test Booking Flow ===");
 
-        // ARRANGE: Set up our test scenario with a realistic test client
-        // This simulates the test client data that your HTML form would send
+        // ARRANGE: Set up test scenario with a realistic test client to simulate client data that the HTML form would send
         BookingController.TestBookingRequest.TestClient testClientData =
                 new BookingController.TestBookingRequest.TestClient();
         testClientData.setId(1);
@@ -395,15 +342,14 @@ public class BookingControllerTest {
         // Step 3: Fare calculation should work
         when(calculateFareService.calculateFare(testRoute)).thenReturn(7.65);
 
-        // Step 4: Booking service should be called (it's a void method, so we just verify it's called)
-        // This is the key test - we want to make sure bookingService.bookCab() gets called with proper objects
+        // Step 4: Verify bookingService.bookCab() should be called with proper objects
 
         // ACT: Call the test booking method
         ResponseEntity<Map<String, Object>> response = bookingController.testBooking(request);
 
         // ASSERT: Verify the complete flow worked correctly
 
-        // Check that we got a successful response
+        // Verify a successful response
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Should return successful HTTP status");
 
         Map<String, Object> responseBody = response.getBody();
@@ -417,7 +363,7 @@ public class BookingControllerTest {
         assertEquals(7.65, responseBody.get("fareAmount"), "Should return correct fare amount");
         assertEquals("John Test Doe", responseBody.get("clientName"), "Should return correct client name");
 
-        // VERIFY: This is the most important part - ensure all services were called correctly
+        // VERIFY: ensure all services were called correctly
 
         // Verify location service was used to find both locations
         verify(locationService).findLocationByName("The White House");
@@ -429,22 +375,14 @@ public class BookingControllerTest {
         // Verify fare calculation service was used
         verify(calculateFareService).calculateFare(testRoute);
 
-        // THIS IS THE KEY VERIFICATION: Ensure bookingService.bookCab() was called
-        // We use ArgumentCaptor to capture the actual Client object that was passed
-        // This lets us verify that the Client object was created correctly from the test data
+        // Ensure bookingService.bookCab() was called
+        // and verify that the Client object was created correctly from the test data
         verify(bookingService).bookCab(any(Client.class), eq(testRoute));
 
         System.out.println("✓ Complete test booking flow verified successfully");
         System.out.println("Response: " + responseBody);
     }
 
-    /**
-     * This test verifies that our test booking creates the Client object correctly
-     * This is crucial because the Client object is what gets passed to bookingService.bookCab()
-     *
-     * Think of this like testing that a restaurant correctly transcribes a phone order
-     * onto their order ticket - all the details need to be accurate
-     */
     @Test
     public void testTestBooking_ClientObjectCreatedCorrectly() {
         System.out.println("=== Testing Client Object Creation ===");
@@ -480,7 +418,6 @@ public class BookingControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
         // VERIFY: Use ArgumentCaptor to capture and examine the Client object that was passed to bookingService
-        // This is an advanced testing technique that lets us inspect method arguments
         var clientCaptor = org.mockito.ArgumentCaptor.forClass(Client.class);
         verify(bookingService).bookCab(clientCaptor.capture(), any(Route.class));
 

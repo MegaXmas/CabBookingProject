@@ -346,7 +346,7 @@ public class ClientControllerTest {
         // Verify the exception message is what we expect
         assertEquals("Path ID (4) does not match JSON ID (999)", exception.getMessage());
 
-        // Verify that we never checked if client exists or tried to update
+        // Verify that clientService never checked if client exists or tried to update
         // because the validation should fail early
         verify(clientService, never()).clientExists(anyInt());
         verify(clientService, never()).updateClient(any(Client.class));

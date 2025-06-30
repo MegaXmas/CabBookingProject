@@ -60,7 +60,7 @@ class RouteServiceTest {
         final Location newYork = new Location("New York", 40.7128, -74.0060);
         final Location losAngeles = new Location("Los Angeles", 34.0522, -118.2437);
 
-        // Expected values (you calculated these)
+        // Expected values
         double expectedKilometers = 3935.75;
 
         // Create a REAL LocationDistanceCalculatorService (no mocking!)
