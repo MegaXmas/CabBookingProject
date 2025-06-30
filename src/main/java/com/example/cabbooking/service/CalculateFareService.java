@@ -30,9 +30,11 @@ public class CalculateFareService {
     public int dollarsPerMile = 3;
     public int initialBookingFee = 3;
 
-    /** method which calculates the fare from a Route object
+    /**
+     * Method which calculates the fare from a Route object
      * @param route Route which will have its fare calculated based on its distance
-     * @return The calculated fare price */
+     * @return The calculated fare price
+     */
     public double calculateFare(Route route) {
         //Validate inputs
         validateFareInputs(route);
@@ -72,8 +74,10 @@ public class CalculateFareService {
         }
     }
 
-    /** Helper method to validate route input
-     * @param route Route object which will have its params verified */
+    /**
+     * Helper method to validate route input
+     * @param route Route object which will have its params verified
+     */
     private void validateFareInputs(Route route) {
         if (route == null) {
             throw new InvalidFareParametersException("Route cannot be null");
@@ -84,7 +88,9 @@ public class CalculateFareService {
         }
     }
 
-    /** Helper method to validate fare calculation parameters */
+    /**
+     * Helper method to validate fare calculation parameters
+     */
     private void validateFareParameters() {
         if (dollarsPerMile < 0) {
             throw new InvalidFareParametersException("Dollars per mile cannot be negative: " + dollarsPerMile);
@@ -99,14 +105,20 @@ public class CalculateFareService {
         }
     }
 
-    /** method to safely update dollars per mile fare parameter */
+    /**
+     * Method to safely update dollars per mile fare parameter
+     * @param dollarsPerMile New amount charged per mile
+     */
     public void setDollarsPerMile(int dollarsPerMile) {
         if (dollarsPerMile < 0) {
             throw new InvalidFareParametersException("Dollars per mile cannot be negative: " + dollarsPerMile);
         }
         this.dollarsPerMile = dollarsPerMile;
     }
-    /** method to safely update booking fee fare parameter */
+    /**
+     * method to safely update booking fee fare parameter
+     * @param initialBookingFee New amount charged as the initial booking fee
+     */
     public void setInitialBookingFee(int initialBookingFee) {
         if (initialBookingFee < 0) {
             throw new InvalidFareParametersException("Initial booking fee cannot be negative: " + initialBookingFee);

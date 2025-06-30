@@ -10,8 +10,12 @@ public class DistanceCalculatorService {
     /**
      * method to run the Haversine Formula, which calculates
      * the distance between two locations using their latitude and longitude
+     * @param lat1 latitude of location 1
+     * @param lon1 longitude of location 1
+     * @param lat2 latitude of location 2
+     * @param lon2 longitude of location 2
      * @return The distance between the two locations in kilometers
-     * */
+     */
     public static double calculateDistance(double lat1, double lon1,
                                            double lat2, double lon2) {
 
