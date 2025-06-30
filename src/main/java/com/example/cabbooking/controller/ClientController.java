@@ -21,7 +21,7 @@ public class ClientController {
         this.clientService = clientService;
     }
 
-    // Custom Exception Classes
+    //==================Custom Exception Classes==================
     public static class ClientNotFoundException extends RuntimeException {
         public ClientNotFoundException(String message) {
             super(message);
@@ -52,7 +52,7 @@ public class ClientController {
         }
     }
 
-    // Exception Handler Methods
+    //====================Exception Handler Methods=======================
     @ExceptionHandler(ClientNotFoundException.class)
     public ResponseEntity<String> handleClientNotFound(ClientNotFoundException e) {
         return new ResponseEntity<>("❌ " + e.getMessage(), HttpStatus.NOT_FOUND);
@@ -78,8 +78,9 @@ public class ClientController {
         return new ResponseEntity<>("❌ " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    // API Endpoints with Exception Handling
+    //==================API Endpoints with Exception Handling=====================
 
+    /** API endpoint to get all clients */
     @GetMapping
     public ResponseEntity<List<Client>> getAllClients() {
         try {
@@ -90,6 +91,7 @@ public class ClientController {
         }
     }
 
+    /** API ednpont to get client by id number */
     @GetMapping("/{id}")
     public ResponseEntity<Client> getClientById(@PathVariable int id) {
         // Validate ID
@@ -106,6 +108,7 @@ public class ClientController {
         }
     }
 
+    /** API endpoint to create a client */
     @PostMapping
     public ResponseEntity<Client> createClient(@RequestBody Client client) {
         // Validate client data
@@ -120,6 +123,7 @@ public class ClientController {
         }
     }
 
+    /** API endpoint to update client information */
     @PutMapping("/{id}")
     public ResponseEntity<Client> updateClient(@PathVariable int id, @RequestBody Client client) {
         // Validate path ID
@@ -153,6 +157,7 @@ public class ClientController {
         }
     }
 
+    /** API endpoint to delete a client from the database */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClient(@PathVariable int id) {
         // Validate ID
@@ -174,7 +179,7 @@ public class ClientController {
         }
     }
 
-    // Helper method to validate client data
+    /** Helper method to validate client data and throw Exceptions */
     private void validateClientData(Client client) {
         if (client == null) {
             throw new InvalidClientDataException("Client data cannot be null");
