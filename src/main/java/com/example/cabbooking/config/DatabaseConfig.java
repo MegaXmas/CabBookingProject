@@ -23,7 +23,6 @@ public class DatabaseConfig {
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
 
-    // Bean definition for DataSource
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -34,7 +33,6 @@ public class DatabaseConfig {
         return dataSource;
     }
 
-    // Bean definition for JdbcTemplate that depends on the dataSource bean
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
