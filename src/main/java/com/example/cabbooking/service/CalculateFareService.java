@@ -9,7 +9,7 @@ public class CalculateFareService {
 
     private final RouteService routeService;
 
-    // ✅ Custom exceptions for fare calculation problems
+    //===============Custom exceptions for fare calculation problems============
     public static class InvalidFareParametersException extends RuntimeException {
         public InvalidFareParametersException(String message) {
             super(message);
@@ -30,24 +30,25 @@ public class CalculateFareService {
     public int dollarsPerMile = 3;
     public int initialBookingFee = 3;
 
+    /** method which calculates the fare from a Route objecty */
     public double calculateFare(Route route) {
-        // ✅ Validate inputs
+        //Validate inputs
         validateFareInputs(route);
 
         try {
             double distance = routeService.getRouteDistance(route);
 
-            // ✅ Validate distance result
+            //Validate distance result
             if (distance < 0) {
                 throw new FareCalculationException("Distance cannot be negative: " + distance);
             }
 
-            // ✅ Validate fare parameters
+            //Validate fare parameters
             validateFareParameters();
 
             double cabFare = initialBookingFee + (distance * dollarsPerMile);
 
-            // ✅ Validate final result
+            //Validate final result
             if (cabFare < 0) {
                 throw new FareCalculationException("Calculated fare cannot be negative: " + cabFare);
             }
@@ -69,7 +70,7 @@ public class CalculateFareService {
         }
     }
 
-    // ✅ Helper method to validate route input
+    /** Helper method to validate route input */
     private void validateFareInputs(Route route) {
         if (route == null) {
             throw new InvalidFareParametersException("Route cannot be null");
@@ -80,7 +81,7 @@ public class CalculateFareService {
         }
     }
 
-    // ✅ Helper method to validate fare calculation parameters
+    /** Helper method to validate fare calculation parameters */
     private void validateFareParameters() {
         if (dollarsPerMile < 0) {
             throw new InvalidFareParametersException("Dollars per mile cannot be negative: " + dollarsPerMile);
@@ -95,14 +96,14 @@ public class CalculateFareService {
         }
     }
 
-    // ✅ Public methods to safely update fare parameters
+    /** method to safely update dollars per mile fare parameter */
     public void setDollarsPerMile(int dollarsPerMile) {
         if (dollarsPerMile < 0) {
             throw new InvalidFareParametersException("Dollars per mile cannot be negative: " + dollarsPerMile);
         }
         this.dollarsPerMile = dollarsPerMile;
     }
-
+    /** method to safely update booking fee fare parameter */
     public void setInitialBookingFee(int initialBookingFee) {
         if (initialBookingFee < 0) {
             throw new InvalidFareParametersException("Initial booking fee cannot be negative: " + initialBookingFee);
@@ -110,12 +111,8 @@ public class CalculateFareService {
         this.initialBookingFee = initialBookingFee;
     }
 
-    // ✅ Getter methods for testing
-    public int getDollarsPerMile() {
-        return dollarsPerMile;
-    }
+    //============Getter methods for testing=============
+    public int getDollarsPerMile() {return dollarsPerMile;}
 
-    public int getInitialBookingFee() {
-        return initialBookingFee;
-    }
+    public int getInitialBookingFee() {return initialBookingFee;}
 }
