@@ -30,7 +30,9 @@ public class CalculateFareService {
     public int dollarsPerMile = 3;
     public int initialBookingFee = 3;
 
-    /** method which calculates the fare from a Route objecty */
+    /** method which calculates the fare from a Route object
+     * @param route Route which will have its fare calculated based on its distance
+     * @return The calculated fare price */
     public double calculateFare(Route route) {
         //Validate inputs
         validateFareInputs(route);
@@ -70,7 +72,8 @@ public class CalculateFareService {
         }
     }
 
-    /** Helper method to validate route input */
+    /** Helper method to validate route input
+     * @param route Route object which will have its params verified */
     private void validateFareInputs(Route route) {
         if (route == null) {
             throw new InvalidFareParametersException("Route cannot be null");

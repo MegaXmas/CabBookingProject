@@ -18,10 +18,8 @@ public class ClientService {
       this.clientRepository = clientRepository;
    }
 
-   /**
-    * Get all clients from the database
-    * @return List of all clients (empty list if none found or error occurs)
-    */
+   /** Get all clients from the database
+    * @return List of all clients (empty list if none found or error occurs */
    public List<Client> getAllClients() {
       return clientRepository.findAll();
    }
