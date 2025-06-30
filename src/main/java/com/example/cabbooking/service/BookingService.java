@@ -32,9 +32,11 @@ public class BookingService {
         this.locationDistanceCalculatorService = locationDistanceCalculatorService;
     }
 
-    /** business logic for booking
+    /**
+     * business logic for booking
      * @param client The Client who is booking the Route
-     * @param route The Route which is being booked and run through the services */
+     * @param route The Route which is being booked and run through the services
+     */
     public void bookCab(Client client, Route route) {
         // Validate inputs
         validateBookingInputs(client, route);
@@ -77,9 +79,11 @@ public class BookingService {
         }
     }
 
-    /** varify booking was completed successfully
+    /**
+     * varify booking was completed successfully
      * @param client The Client who is booking the Route
-     * @param route The Route which is being booked and run through the services */
+     * @param route The Route which is being booked and run through the services
+     */
     public void finishBookingCab(Client client, Route route) {
         // ✅ Validate inputs
         validateBookingInputs(client, route);
@@ -102,9 +106,11 @@ public class BookingService {
         }
     }
 
-    /** Helper method to validate booking inputs
+    /**
+     * Helper method to validate booking inputs
      * @param client The Client who is booking the Route and needs to be validated
-     * @param route The Route which needs to be validated before being run through the services */
+     * @param route The Route which needs to be validated before being run through the services
+     * */
     private void validateBookingInputs(Client client, Route route) {
         if (client == null) {
             throw new InvalidBookingException("Client cannot be null");
@@ -127,8 +133,10 @@ public class BookingService {
         }
     }
 
-    /** Helper method to validate client data
-     * @param client The Client who is booking the Route and needs to be validated */
+    /**
+     * Helper method to validate client data
+     * @param client The Client who is booking the Route and needs to be validated
+     * */
     private void validateClientData(Client client) {
         if (client.getId() == null || client.getId() <= 0) {
             throw new InvalidBookingException("Client must have a valid ID");
@@ -148,7 +156,12 @@ public class BookingService {
         }
     }
 
-    /** Utility method to check if a booking is valid (for external use) */
+    /**
+     * Utility method to check if a booking is valid (for external use)
+     * @param client Client who is booking the cab which is to be verified
+     * @param route Route object which will have its parameters verified
+     * @return true if valid, false otherwise
+     */
     public boolean isValidBooking(Client client, Route route) {
         try {
             validateBookingInputs(client, route);
@@ -158,9 +171,12 @@ public class BookingService {
         }
     }
 
-    /** Method to get booking summary without actually booking
-      * @param client The Client who is booking the Route
-      * @param route The Route for which a booking summary will be printed*/
+    /**
+     * Method to get booking summary without actually booking
+     * @param client The Client who is booking the Route
+     * @param route The Route for which a booking summary will be printed
+     * @return String of a booking summary
+     */
     public String getBookingSummary(Client client, Route route) {
         validateBookingInputs(client, route);
 
