@@ -98,7 +98,6 @@ class CalculateFareServiceTest {
 
     @Test
     void calculateFareWithDifferentRatesTest() {
-        // ✅ Use the new setter methods
         calculateFareService.setDollarsPerMile(5);
         calculateFareService.setInitialBookingFee(2);
 

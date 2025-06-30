@@ -27,7 +27,7 @@ public class LocationTest {
         assertEquals(-73.9654, location.getLongitude());
     }
 
-    // Test that setters and getters work properly for latitude
+    // Test latitude getter and setter
     @Test
     public void testLatitudeGetterAndSetter() {
         Location location = new Location();

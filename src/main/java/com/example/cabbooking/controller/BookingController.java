@@ -5,282 +5,285 @@ import com.example.cabbooking.model.Location;
 import com.example.cabbooking.model.Route;
 import com.example.cabbooking.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/booking")
 public class BookingController {
 
+    //=============SERVICES==============
     private final BookingService bookingService;
     private final CalculateFareService calculateFareService;
-    private final PaymentService paymentService;
+    private final LocationService locationService;
     private final RouteService routeService;
-    private final ClientService clientService;
 
     @Autowired
     public BookingController(BookingService bookingService,
                              CalculateFareService calculateFareService,
-                             PaymentService paymentService,
-                             RouteService routeService,
-                             ClientService clientService) {
+                             LocationService locationService,
+                             RouteService routeService) {
         this.bookingService = bookingService;
         this.calculateFareService = calculateFareService;
-        this.paymentService = paymentService;
+        this.locationService = locationService;
         this.routeService = routeService;
-        this.clientService = clientService;
     }
 
-    // =================== CUSTOM EXCEPTIONS ===================
-
     /**
-     * Exception thrown when booking-related errors occur
+     * Sets up all the Washington DC locations on start-up
      */
-    public static class BookingException extends RuntimeException {
-        public BookingException(String message) {
-            super(message);
-        }
+    @PostConstruct
+    public void initializeLocations() {
+        System.out.println("Setting up Washington DC locations for the booking system...");
+        locationService.initializeWashingtonDCLocations();
+        System.out.println("Location setup complete! Ready for bookings.");
     }
 
     /**
-     * Exception thrown when client validation fails
-     */
-    public static class InvalidClientException extends BookingException {
-        public InvalidClientException(String message) {
-            super("Invalid client: " + message);
-        }
-    }
-
-    /**
-     * Exception thrown when route validation fails
-     */
-    public static class InvalidRouteException extends BookingException {
-        public InvalidRouteException(String message) {
-            super("Invalid route: " + message);
-        }
-    }
-
-    /**
-     * Exception thrown when payment processing fails
-     */
-    public static class PaymentProcessingException extends BookingException {
-        public PaymentProcessingException(String message) {
-            super("Payment error: " + message);
-        }
-    }
-
-    // =================== EXCEPTION HANDLER ===================
-
-    /**
-     * Handles all booking-related exceptions and returns appropriate HTTP responses
-     */
-    @ExceptionHandler(BookingException.class)
-    public ResponseEntity<String> handleBookingException(BookingException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-    }
-
-    /**
-     * Handles general exceptions that might occur
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGeneralException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("An unexpected error occurred: " + ex.getMessage());
-    }
-
-    // =================== BOOKING ENDPOINTS ===================
-
-    /**
-     * Books a cab for a client with proper validation and error handling
-     * @param request The client requesting the booking
-     * @return Response with booking confirmation and fare information
+     * Booking endpoint
      */
     @PostMapping
-    public ResponseEntity<String> bookCab(@RequestBody BookingRequest request) {
-        Client client = request.getClient();
-        Route route = request.getRoute();
+    public void bookCab(@RequestBody Client client, Route route) {
+        bookingService.bookCab(client, route);
+        calculateFareService.calculateFare(route);
+    }
 
+    /**
+     * Web-based fare calculation endpoint for HTML form
+     * @param request the JSON delivered from the HTML request
+     * @return HashMap of the booking request send from the HTML
+     */
+    @PostMapping("/calculate-fare")
+    public ResponseEntity<Map<String, Object>> calculateWebBookingFare(@RequestBody WebBookingRequest request) {
         try {
-            // Validate inputs first
-            if (client == null) {
-                throw new InvalidClientException("Client information is required");
-            }
-            if (route == null) {
-                throw new InvalidRouteException("Route information is required");
+            System.out.println("Web booking request received:");
+            System.out.println("  From: " + request.getPickupLocation());
+            System.out.println("  To: " + request.getDropoffLocation());
+
+            // Step 1: Find the actual Location objects that match what the user selected
+            Location pickupLocationObj = locationService.findLocationByName(request.getPickupLocation());
+            Location dropoffLocationObj = locationService.findLocationByName(request.getDropoffLocation());
+
+            // Validate that we found both locations
+            if (pickupLocationObj == null) {
+                System.out.println("ERROR: Could not find pickup location: " + request.getPickupLocation());
+                return ResponseEntity.badRequest()
+                        .body(createErrorResponse("Pickup location not found: " + request.getPickupLocation()));
             }
 
-            // Do the booking
+            if (dropoffLocationObj == null) {
+                System.out.println("ERROR: Could not find dropoff location: " + request.getDropoffLocation());
+                return ResponseEntity.badRequest()
+                        .body(createErrorResponse("Drop-off location not found: " + request.getDropoffLocation()));
+            }
+
+            System.out.println("✓ Both locations found successfully");
+
+            // Step 2: Create a Route object using RouteService
+            Route route = routeService.createRoute(pickupLocationObj, dropoffLocationObj);
+            System.out.println("✓ Route created - Distance: " + String.format("%.2f", route.getDistance()) + " km");
+
+            // Step 3: Calculate the fare using CalculateFareService
+            double fareAmount = calculateFareService.calculateFare(route);
+            System.out.println("✓ Fare calculated: $" + String.format("%.2f", fareAmount));
+
+            // Step 4: Package everything into a response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("pickupLocation", request.getPickupLocation());
+            response.put("dropoffLocation", request.getDropoffLocation());
+            response.put("distance", route.getDistance());
+            response.put("fareAmount", fareAmount);
+            response.put("message", "Fare calculated successfully using your booking services!");
+
+            System.out.println("✓ Web booking calculation complete");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("ERROR in web booking calculation: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(createErrorResponse("Error calculating fare: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * API endpoint to get all available locations
+     * @return List of location objects
+     */
+    @GetMapping("/locations")
+    public ResponseEntity<List<Location>> getAllLocations() {
+        try {
+            List<Location> locations = locationService.getAllLocations();
+            System.out.println("Sending " + locations.size() + " locations to web client");
+            return ResponseEntity.ok(locations);
+        } catch (Exception e) {
+            System.out.println("Error getting locations for web client: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Helper method to create consistent error responses for the web client
+     * @param errorMessage Error message to be created
+     * @return Generated error message
+     */
+    private Map<String, Object> createErrorResponse(String errorMessage) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("success", false);
+        errorResponse.put("error", errorMessage);
+        return errorResponse;
+    }
+
+    /**
+     * Test booking endpoint that accepts a pre-made client and route information
+     * This allows the frontend to send a complete booking without requiring user registration
+     * @param request the JSON delivered from the HTML request
+     * @return HashMap of the booking request send from the HTML
+     */
+    @PostMapping("/test-booking")
+    public ResponseEntity<Map<String, Object>> testBooking(@RequestBody TestBookingRequest request) {
+        try {
+            System.out.println("Test booking request received for: " + request.getClient().getName());
+
+            // STEP 1: Create Client object from the JSON test data sent by frontend
+            Client client = new Client(
+                    request.getClient().getId(),
+                    request.getClient().getName(),
+                    request.getClient().getEmail(),
+                    request.getClient().getPhone(),
+                    request.getClient().getAddress(),
+                    request.getClient().getCredit_card()
+            );
+
+            // STEP 2: Find locations and create route
+            Location pickupLocationObj = locationService.findLocationByName(request.getPickupLocation());
+            Location dropoffLocationObj = locationService.findLocationByName(request.getDropoffLocation());
+
+            if (pickupLocationObj == null || dropoffLocationObj == null) {
+                return ResponseEntity.badRequest()
+                        .body(createErrorResponse("One or both locations not found"));
+            }
+
+            Route route = routeService.createRoute(pickupLocationObj, dropoffLocationObj);
+            double fareAmount = calculateFareService.calculateFare(route);
+
+            // STEP 3: call bookingService.bookCab() with both objects
             bookingService.bookCab(client, route);
-            double fare = calculateFareService.calculateFare(route);
 
-            String message = String.format("Cab booked successfully! Fare: $%.2f", fare);
-            return ResponseEntity.ok(message);
+            // STEP 4: Return the response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("pickupLocation", request.getPickupLocation());
+            response.put("dropoffLocation", request.getDropoffLocation());
+            response.put("distance", route.getDistance());
+            response.put("fareAmount", fareAmount);
+            response.put("clientName", client.getName());
 
-        } catch (Exception ex) {
-            throw new BookingException("Booking failed: " + ex.getMessage());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(createErrorResponse("Test booking error: " + e.getMessage()));
         }
     }
 
     /**
-     * Creates a route and books a cab in one step
-     * @param request Contains client info, start location, end location
-     * @return Response with booking confirmation
+     * Simple data class to receive the test booking request
      */
-    @PostMapping("/quick-book")
-    public ResponseEntity<String> quickBookCab(@RequestBody QuickBookingRequest request) {
-        try {
-            // Validate client exists
-            if (!clientService.clientExists(request.getClientId())) {
-                throw new InvalidClientException("Client not found with ID: " + request.getClientId());
-            }
+    public static class TestBookingRequest {
+        private TestClient client;
+        private String pickupLocation;
+        private String dropoffLocation;
 
-            // Get client details
-            Client client = clientService.getClientById(request.getClientId())
-                    .orElseThrow(() -> new InvalidClientException("Could not retrieve client"));
+        // ============TestBookingRequest constructors, getters, and setters==============
+        public TestBookingRequest() {}
 
-            // Create route from locations
-            Route route = routeService.createRoute(request.getFromLocation(), request.getToLocation());
+        public TestClient getClient() { return client; }
+        public void setClient(TestClient client) { this.client = client; }
 
-            // Book the cab
-            bookingService.bookCab(client, route);
+        public String getPickupLocation() { return pickupLocation; }
+        public void setPickupLocation(String pickupLocation) { this.pickupLocation = pickupLocation; }
 
-            // Calculate fare
-            double fare = calculateFareService.calculateFare(route);
+        public String getDropoffLocation() { return dropoffLocation; }
+        public void setDropoffLocation(String dropoffLocation) { this.dropoffLocation = dropoffLocation; }
 
-            String message = String.format("Quick booking successful! From: %s To: %s Fare: $%.2f",
-                    request.getFromLocation().getLocationName(),
-                    request.getToLocation().getLocationName(),
-                    fare);
-            return ResponseEntity.ok(message);
+        /**
+         * Inner class to match the test client structure from frontend
+         */
+        public static class TestClient {
+            private Integer id;
+            private String name;
+            private String email;
+            private String phone;
+            private String address;
+            private String credit_card;
 
-        } catch (BookingException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new BookingException("Quick booking failed: " + ex.getMessage());
+            // ==============Test Client default constructor and getters/setters=============
+            public TestClient() {}
+
+            public Integer getId() { return id; }
+            public void setId(Integer id) { this.id = id; }
+
+            public String getName() { return name; }
+            public void setName(String name) { this.name = name; }
+
+            public String getEmail() { return email; }
+            public void setEmail(String email) { this.email = email; }
+
+            public String getPhone() { return phone; }
+            public void setPhone(String phone) { this.phone = phone; }
+
+            public String getAddress() { return address; }
+            public void setAddress(String address) { this.address = address; }
+
+            public String getCredit_card() { return credit_card; }
+            public void setCredit_card(String credit_card) { this.credit_card = credit_card; }
+        }
+
+        @Override
+        public String toString() {
+            return "TestBookingRequest{" +
+                    "client=" + client +
+                    ", pickupLocation='" + pickupLocation + '\'' +
+                    ", dropoffLocation='" + dropoffLocation + '\'' +
+                    '}';
         }
     }
 
     /**
-     * Processes payment for a booking
-     * @param request Payment details
-     * @return Payment confirmation
+     * Inner class to represent the booking request coming from the HTML form
+     * and methods to covert JSON
      */
-    @PostMapping("/payment")
-    public ResponseEntity<String> processPayment(@RequestBody PaymentRequest request) {
-        try {
-            // Validate client
-            Client client = clientService.getClientById(request.getClientId())
-                    .orElseThrow(() -> new InvalidClientException("Client not found"));
+    public static class WebBookingRequest {
+        private String pickupLocation;
+        private String dropoffLocation;
 
-            // Process payment using PaymentService
-            paymentService.paymentConfirmation(client, request.getRoute(),
-                    request.getPaymentAmount(), request.getCreditCardNumber());
+        //=============WebBookingRequest constructors, getters, and setters===========
+        public WebBookingRequest() {}
 
-            return ResponseEntity.ok("Payment processed successfully!");
-
-        } catch (RuntimeException ex) {
-            // PaymentService throws RuntimeException for invalid card or amount
-            throw new PaymentProcessingException(ex.getMessage());
-        } catch (Exception ex) {
-            throw new PaymentProcessingException("Payment processing failed: " + ex.getMessage());
-        }
-    }
-
-    // =================== HELPER METHODS ===================
-
-    /**
-     * Validates a booking request to ensure all required data is present and valid
-     */
-    private void validateBookingRequest(BookingRequest request) {
-        if (request == null) {
-            throw new BookingException("Booking request cannot be null");
+        public WebBookingRequest(String pickupLocation, String dropoffLocation) {
+            this.pickupLocation = pickupLocation;
+            this.dropoffLocation = dropoffLocation;
         }
 
-        // Validate client
-        if (request.getClient() == null) {
-            throw new InvalidClientException("Client information is required");
+        public String getPickupLocation() {return pickupLocation;}
+        public void setPickupLocation(String pickupLocation) {this.pickupLocation = pickupLocation;}
+
+        public String getDropoffLocation() {return dropoffLocation;}
+        public void setDropoffLocation(String dropoffLocation) {this.dropoffLocation = dropoffLocation;}
+
+        @Override
+        public String toString() {
+            return "WebBookingRequest{" +
+                    "pickupLocation='" + pickupLocation + '\'' +
+                    ", dropoffLocation='" + dropoffLocation + '\'' +
+                    '}';
         }
-
-        if (request.getClient().getName() == null || request.getClient().getName().trim().isEmpty()) {
-            throw new InvalidClientException("Client name is required");
-        }
-
-        // Validate route
-        if (request.getRoute() == null) {
-            throw new InvalidRouteException("Route information is required");
-        }
-
-        if (request.getRoute().getFrom() == null || request.getRoute().getTo() == null) {
-            throw new InvalidRouteException("Both start and end locations are required");
-        }
-
-        if (request.getRoute().getDistance() <= 0) {
-            throw new InvalidRouteException("Route distance must be greater than 0");
-        }
-    }
-
-    // =================== REQUEST/RESPONSE CLASSES ===================
-
-    /**
-     * Request object for standard booking
-     */
-    public static class BookingRequest {
-        private Client client;
-        private Route route;
-
-        // Constructors, getters, and setters
-        public BookingRequest() {}
-
-        public BookingRequest(Client client, Route route) {
-            this.client = client;
-            this.route = route;
-        }
-
-        public Client getClient() { return client; }
-        public void setClient(Client client) { this.client = client; }
-        public Route getRoute() { return route; }
-        public void setRoute(Route route) { this.route = route; }
-    }
-
-    /**
-     * Request object for quick booking with locations
-     */
-    public static class QuickBookingRequest {
-        private Integer clientId;
-        private Location fromLocation;
-        private Location toLocation;
-
-        // Constructors, getters, and setters
-        public QuickBookingRequest() {}
-
-        public Integer getClientId() { return clientId; }
-        public void setClientId(Integer clientId) { this.clientId = clientId; }
-        public Location getFromLocation() { return fromLocation; }
-        public void setFromLocation(Location fromLocation) { this.fromLocation = fromLocation; }
-        public Location getToLocation() { return toLocation; }
-        public void setToLocation(Location toLocation) { this.toLocation = toLocation; }
-    }
-
-    /**
-     * Request object for payment processing
-     */
-    public static class PaymentRequest {
-        private Integer clientId;
-        private Route route;
-        private double paymentAmount;
-        private String creditCardNumber;
-
-        public PaymentRequest() {}
-
-        // Getters and setters
-        public Integer getClientId() { return clientId; }
-        public void setClientId(Integer clientId) { this.clientId = clientId; }
-        public Route getRoute() { return route; }
-        public void setRoute(Route route) { this.route = route; }
-        public double getPaymentAmount() { return paymentAmount; }
-        public void setPaymentAmount(double paymentAmount) { this.paymentAmount = paymentAmount; }
-        public String getCreditCardNumber() { return creditCardNumber; }
-        public void setCreditCardNumber(String creditCardNumber) { this.creditCardNumber = creditCardNumber; }
     }
 }

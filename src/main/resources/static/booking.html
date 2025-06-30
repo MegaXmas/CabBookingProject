@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cab Booking</title>
+    <title>Cab Booking - Test Client Mode</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,6 +17,11 @@
                 <div class="card-header bg-warning text-black text-center">
                     <h3><i class="fas fa-user-plus"></i>🚕 Washington D.C. Cab Service 🚕</h3>
                     <p class="subtitle">Book your ride to popular D.C. destinations</p>
+                    <!-- Test Client Info Display -->
+                    <div class="alert alert-info mt-2 mb-0">
+                        <small><strong> Test Mode:</strong> You are logged in as <strong id="testClientName"></strong>
+                            (test@example.com) | Card: <strong>****-****-****-1234</strong></small>
+                    </div>
                 </div>
 
                 <div class="card-body">
@@ -96,8 +101,8 @@
                         <div class="row mt-4">
                             <div class="col-12 text-center">
                                 <!-- Main submit button with Bootstrap styling -->
-                                <button type="submit" class="btn btn-success btn-lg px-5 py-3 me-3">
-                                    🚕 Book Your Cab Now! 🚕
+                                <button type="submit" class="btn btn-success btn-lg px-5 py-3 me-3" id="bookingButton">
+                                    🚕 Book Cab & Calculate Fare! 🚕
                                 </button>
 
                                 <!-- Optional: Reset button to clear the form -->
@@ -112,7 +117,21 @@
                             <div class="col-12">
                                 <div id="priceEstimate" class="alert alert-info text-center" style="display: none;">
                                     <h5>💰 Estimated Fare: <span id="fareAmount">$0.00</span></h5>
-                                    <p class="mb-0">Final price may vary based on traffic and route conditions</p>
+                                    <p>Distance: <span id="distanceAmount">0.0</span> km</p>
+                                    <p class="mb-0">Booking confirmed for <span id="confirmedClientName"></span></p>
+                                    <small class="text-muted">Final price may vary based on traffic and route conditions</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading indicator -->
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <div id="loadingIndicator" class="spinner-border text-primary" role="status" style="display: none;">
+                                    <span class="visually-hidden">Calculating fare...</span>
+                                </div>
+                                <div id="loadingText" style="display: none;" class="mt-2">
+                                    <small class="text-muted">Processing your booking...</small>
                                 </div>
                             </div>
                         </div>
@@ -126,44 +145,164 @@
 <!-- Bootstrap JavaScript (optional, for enhanced functionality) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Simple JavaScript to handle form submission -->
+<!-- JavaScript with Test Client Integration -->
 <script>
-    document.getElementById('bookingForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevents the form from actually submitting
+    // ============================================================================
+    // TEST CLIENT CONFIGURATION
+    // This is where we create our "logged in" test client
+    // In a real app, this would come from a login system or user session
+    // ============================================================================
 
-        // Get the selected values
+    const TEST_CLIENT = {
+        id: 1,                                    // Simple test ID
+        name: "Test Client",                    // Test client name
+        email: "test@example.com",           // Test email
+        phone: "555-123-4567",                    // Test phone
+        address: "123 Test Street, Washington DC", // Test address
+        credit_card: "4111-1111-1111-1234"       // Test credit card
+    };
+
+    // Display the test client info in the header (so you know who you're "logged in" as)
+    document.getElementById('testClientName').textContent = TEST_CLIENT.name;
+
+    // ============================================================================
+    // FORM SUBMISSION HANDLER
+    // This function now sends both the test client AND the route information
+    // to your existing backend, without requiring any backend changes
+    // ============================================================================
+
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Stop the form from submitting the traditional way
+
+        // Get the selected locations from the form
         const pickup = document.getElementById('pickupLocation').value;
         const dropoff = document.getElementById('dropoffLocation').value;
 
-        // Simple validation
+        // Simple validation (same as before)
         if (!pickup || !dropoff) {
-            alert('Please select both pickup and drop-off locations!');
+            showMessage('Please select both pickup and drop-off locations!', 'error');
             return;
         }
 
         if (pickup === dropoff) {
-            alert('Pickup and drop-off locations cannot be the same!');
+            showMessage('Pickup and drop-off locations cannot be the same!', 'error');
             return;
         }
 
-        // Show success message
-        const messageArea = document.getElementById('messageArea');
-        messageArea.innerHTML = `
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>🎉 Booking Confirmed!</strong> Your cab from <em>${pickup}</em> to <em>${dropoff}</em> has been requested.
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
+        // Show loading animation
+        showLoading(true);
 
-        // Show estimated price (this would normally come from your backend)
-        const priceEstimate = document.getElementById('priceEstimate');
-        const fareAmount = document.getElementById('fareAmount');
-        fareAmount.textContent = '$' + (Math.random() * 20 + 15).toFixed(2); // Random price between $15-35
-        priceEstimate.style.display = 'block';
+        // ============================================================================
+        // Here's the key insight: we send BOTH the test client data AND the route data
+        // to your existing backend endpoint, allowing it to create both the Client object
+        // and the Route object as needed
+        // ============================================================================
 
-        // Scroll to the top to show the message
-        messageArea.scrollIntoView({ behavior: 'smooth' });
+        // Create the booking request that includes both client and trip information
+        const bookingRequest = {
+            // Test client information (this simulates being "logged in")
+            client: TEST_CLIENT,
+
+            // Trip information from the form
+            pickupLocation: pickup,
+            dropoffLocation: dropoff
+        };
+
+        console.log('Sending booking request with test client:', TEST_CLIENT.name);
+        console.log('Trip:', pickup, '->', dropoff);
+
+        // Send to your existing backend - but now we're sending complete information
+        // Your backend can use both pieces: the client object for bookCab() and
+        // the location names for route creation
+        fetch('/booking/test-booking', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bookingRequest)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide loading animation
+                showLoading(false);
+
+                if (data.success) {
+                    // Show success message with test client name
+                    showMessage(`🎉 Booking Confirmed! Hello ${TEST_CLIENT.name}, your cab from ${data.pickupLocation} to ${data.dropoffLocation} has been booked!`, 'success');
+
+                    // Display the calculated fare
+                    document.getElementById('fareAmount').textContent = '$' + data.fareAmount.toFixed(2);
+                    document.getElementById('distanceAmount').textContent = data.distance.toFixed(2);
+                    document.getElementById('confirmedClientName').textContent = TEST_CLIENT.name;
+                    document.getElementById('priceEstimate').style.display = 'block';
+
+                    // Scroll to show the results
+                    document.getElementById('messageArea').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showMessage('Error: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                console.error('Error:', error);
+                showMessage('Sorry, there was an error processing your booking. Please try again.', 'error');
+            });
     });
+
+    // ============================================================================
+    // UTILITY FUNCTIONS (same as before, but with updated text)
+    // ============================================================================
+
+    function showMessage(message, type) {
+        const messageArea = document.getElementById('messageArea');
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+
+        messageArea.innerHTML = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+
+    function showLoading(show) {
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loadingText = document.getElementById('loadingText');
+        const bookingButton = document.getElementById('bookingButton');
+
+        if (show) {
+            loadingIndicator.style.display = 'block';
+            loadingText.style.display = 'block';
+            bookingButton.disabled = true;
+            bookingButton.textContent = 'Processing...';
+        } else {
+            loadingIndicator.style.display = 'none';
+            loadingText.style.display = 'none';
+            bookingButton.disabled = false;
+            bookingButton.textContent = '🚕 Book Cab & Calculate Fare! 🚕';
+        }
+    }
+
+    // Reset form functionality
+    document.querySelector('button[type="reset"]').addEventListener('click', function() {
+        document.getElementById('priceEstimate').style.display = 'none';
+        document.getElementById('messageArea').innerHTML = '';
+    });
+
+    // ============================================================================
+    // HELPFUL DEBUGGING: Log the test client info to console
+    // This helps you see exactly what data is being sent to your backend
+    // ============================================================================
+
+    console.log('=== TEST CLIENT MODE ACTIVE ===');
+    console.log('Test Client:', TEST_CLIENT);
+    console.log('When you submit the form, both this client data and your selected locations will be sent to the backend.');
+    console.log('Your backend can then create the Client object and Route object as needed.');
 </script>
 </body>
 </html>

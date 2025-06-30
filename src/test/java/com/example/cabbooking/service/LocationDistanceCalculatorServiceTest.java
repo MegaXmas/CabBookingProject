@@ -40,7 +40,6 @@ class LocationDistanceCalculatorServiceTest {
 
     @Test
     void testPrintDistanceReport() {
-        // This will print to console (you can see the output)
         double milesResult = locationDistanceCalculatorService.printDistanceReport(newYork, losAngeles);
 
         // Verify it returns miles (should be around 2445)

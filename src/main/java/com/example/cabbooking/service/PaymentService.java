@@ -11,7 +11,7 @@ public class PaymentService {
     private final CalculateFareService calculateFareService;
     private final BookingService bookingService;
 
-    // ✅ Custom exceptions for payment-related problems
+    // Custom exceptions for payment-related problems
     public static class InvalidPaymentException extends RuntimeException {
         public InvalidPaymentException(String message) {
             super(message);
@@ -37,6 +37,11 @@ public class PaymentService {
         this.bookingService = bookingService;
     }
 
+    /**
+     * requests a payment from the client calculated based on the route parameter
+     * @param client client who is paying the cab fare
+     * @param route the distance of this route will be used to calculate the fare
+     */
     public void requestPayment(Client client, Route route) {
         // ✅ Validate inputs
         validatePaymentInputs(client, route);
@@ -44,7 +49,7 @@ public class PaymentService {
         try {
             double fare = calculateFareService.calculateFare(route);
 
-            // ✅ Validate calculated fare
+            // Validate calculated fare
             if (fare <= 0) {
                 throw new PaymentProcessException("Invalid fare calculated: " + fare);
             }
@@ -57,29 +62,37 @@ public class PaymentService {
             throw new PaymentProcessException("Cannot request payment due to fare calculation error: " + e.getMessage());
         } catch (Exception e) {
             if (e instanceof InvalidPaymentException || e instanceof PaymentProcessException) {
-                throw e; // Re-throw our custom exceptions
+                throw e;
             }
             throw new PaymentProcessException("Failed to request payment: " + e.getMessage());
         }
     }
 
+    /**
+     * confirming that the fare was successfully paid or if there were errors
+     * @param client client who is paying the cab fare
+     * @param route the distance of this route will be used to calculate the fare
+     * @param paymentAmount the dollar amount the client is to pay to finish booking their cab
+     * @param creditCardNumber confirmation that the credit card used to pay the fare matches the credit card
+     *                         the client has on file
+     */
     public void paymentConfirmation(Client client, Route route, double paymentAmount, String creditCardNumber) {
-        // ✅ Validate inputs
+        // Validate inputs
         validatePaymentConfirmationInputs(client, route, paymentAmount, creditCardNumber);
 
         try {
             double expectedFare = calculateFareService.calculateFare(route);
 
-            // ✅ Validate credit card
+            // Validate credit card
             validateCreditCard(creditCardNumber, client.getCredit_card());
 
-            // ✅ Validate payment amount with tolerance for floating point precision
+            // Validate payment amount with tolerance for floating point precision
             if (Math.abs(paymentAmount - expectedFare) > 0.01) {
                 throw new InvalidPaymentException("Incorrect payment amount. Expected: $" +
                         String.format("%.2f", expectedFare) + ", Received: $" + String.format("%.2f", paymentAmount));
             }
 
-            // ✅ Process successful payment
+            // Process successful payment
             System.out.println("✓ Payment from " + client.getName() + " confirmed");
             System.out.println("✓ $" + String.format("%.2f", expectedFare) +
                     " charged to card ending in " + getMaskedCardNumber(client.getCredit_card()));
@@ -95,13 +108,17 @@ public class PaymentService {
             throw new PaymentProcessException("Payment processed but booking completion failed: " + e.getMessage());
         } catch (Exception e) {
             if (e instanceof InvalidPaymentException || e instanceof PaymentProcessException || e instanceof CreditCardException) {
-                throw e; // Re-throw our custom exceptions
+                throw e;
             }
             throw new PaymentProcessException("Failed to confirm payment: " + e.getMessage());
         }
     }
 
-    // ✅ Helper method to validate payment inputs
+    /**
+     * helper method to validate payment inputs
+     * @param client client paying the fare, whose information is to be validated
+     * @param route the route that is to be validated as not null
+     */
     private void validatePaymentInputs(Client client, Route route) {
         if (client == null) {
             throw new InvalidPaymentException("Client cannot be null");
@@ -120,7 +137,13 @@ public class PaymentService {
         }
     }
 
-    // ✅ Helper method to validate payment confirmation inputs
+    /**
+     * helper method to validate payment confirmation inputs
+     * @param client client paying the fare
+     * @param route route that the fare amount is being calculated from
+     * @param paymentAmount confirming that the paymentAmount has is a valid amount
+     * @param creditCardNumber to be validated as not null/ not empty
+     */
     private void validatePaymentConfirmationInputs(Client client, Route route, double paymentAmount, String creditCardNumber) {
         validatePaymentInputs(client, route);
 
@@ -137,13 +160,18 @@ public class PaymentService {
         }
     }
 
-    // ✅ Helper method to validate credit card
+    /**
+     * helper method which removes any spaces or dashes from the credit card Strings for proper formating
+     * and then validates the credit card
+     * @param providedCard credit card provided to pay the cab fare which must match the client's card on file
+     * @param clientCard credit card the client has on file which must match the provided card
+     */
     private void validateCreditCard(String providedCard, String clientCard) {
         if (clientCard == null || clientCard.trim().isEmpty()) {
             throw new CreditCardException("Client does not have a credit card on file");
         }
 
-        // Remove any spaces or dashes for comparison
+        // Remove any spaces or dashes for proper formating
         String cleanProvidedCard = providedCard.replaceAll("[\\s-]", "");
         String cleanClientCard = clientCard.replaceAll("[\\s-]", "");
 
@@ -151,13 +179,17 @@ public class PaymentService {
             throw new CreditCardException("Credit card number does not match card on file");
         }
 
-        // Basic credit card validation (length check)
+        // Credit card length validation
         if (cleanClientCard.length() < 13 || cleanClientCard.length() > 19) {
             throw new CreditCardException("Invalid credit card number format");
         }
     }
 
-    // ✅ Helper method to mask credit card number for security
+    /**
+     * helper method to mask the credit card number for security purposes
+     * @param cardNumber credit card number to be masked
+     * @return masked credit card number
+     */
     private String getMaskedCardNumber(String cardNumber) {
         if (cardNumber == null || cardNumber.length() < 4) {
             return "****";
@@ -171,7 +203,12 @@ public class PaymentService {
         return "****" + cleanCard.substring(cleanCard.length() - 4);
     }
 
-    // ✅ Utility method to check if payment can be processed
+    /**
+     * Utility method to check if payment can be processed
+     * @param client client paying the fare
+     * @param route route that the fare amount is being calculated from
+     * @return true if payment is processed successfully, false if otherwise
+     */
     public boolean canProcessPayment(Client client, Route route) {
         try {
             validatePaymentInputs(client, route);
@@ -190,7 +227,12 @@ public class PaymentService {
         }
     }
 
-    // ✅ Method to get payment summary
+    /**
+     * generates a payment summary for the client who booked the cab
+     * @param client client who is paying the cab fare
+     * @param route route which the cab fare is calculated from
+     * @return generated payment summary
+     */
     public String getPaymentSummary(Client client, Route route) {
         validatePaymentInputs(client, route);
 
