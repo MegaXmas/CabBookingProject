@@ -1,6 +1,7 @@
 package com.example.cabbooking.controller;
 
 import com.example.cabbooking.model.Client;
+import com.example.cabbooking.repository.ClientRepository;
 import com.example.cabbooking.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,10 +16,12 @@ import java.util.Optional;
 public class ClientController {
 
     private final ClientService clientService;
+    private final ClientRepository clientRepository;
 
     @Autowired
-    public ClientController(ClientService clientService) {
+    public ClientController(ClientService clientService, ClientRepository clientRepository) {
         this.clientService = clientService;
+        this.clientRepository = clientRepository;
     }
 
     // Custom Exception Classes
@@ -86,7 +89,7 @@ public class ClientController {
             List<Client> clients = clientService.getAllClients();
             return new ResponseEntity<>(clients, HttpStatus.OK);
         } catch (Exception e) {
-            throw new RuntimeException("❌ Failed to retrieve clients: " + e.getMessage());
+            throw new RuntimeException("Failed to retrieve clients: " + e.getMessage());
         }
     }
 
@@ -130,6 +133,11 @@ public class ClientController {
         // Validate client data
         validateClientData(client);
 
+        // Check if client exists
+        if (!clientService.clientExists(id)) {
+            throw new ClientNotFoundException("Client with ID " + id + " not found");
+        }
+
         if (client.getId() != null && !client.getId().equals(id)) {
             throw new InvalidClientDataException(
                     "Path ID (" + id + ") does not match JSON ID (" + client.getId() + ")"
@@ -138,11 +146,6 @@ public class ClientController {
 
         // Set the ID from the path parameter
         client.setId(id);
-
-        // Check if client exists
-        if (!clientService.clientExists(id)) {
-            throw new ClientNotFoundException("Client with ID " + id + " not found");
-        }
 
         boolean success = clientService.updateClient(client);
 

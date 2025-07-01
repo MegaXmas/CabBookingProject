@@ -1,6 +1,7 @@
 package com.example.cabbooking.controller;
 
 import com.example.cabbooking.model.Client;
+import com.example.cabbooking.repository.ClientRepository;
 import com.example.cabbooking.service.ClientService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.util.*;
 
@@ -18,6 +21,7 @@ public class ClientControllerTest {
 
     @Mock
     private ClientService clientService;
+    private ClientRepository clientRepository;
 
     private ClientController clientController;
     private Client testClient;
@@ -25,7 +29,7 @@ public class ClientControllerTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        clientController = new ClientController(clientService);
+        clientController = new ClientController(clientService, clientRepository);
 
         testClient = new Client(1, "John Doe", "john@email.com",
                 "555-1234", "123 Main St", "4111-1111-1111-1111");
@@ -336,19 +340,22 @@ public class ClientControllerTest {
         Client clientWithWrongId = new Client(999, "John Updated", "johnupdated@email.com",
                 "555-9999", "456 New Street", "4111-1111-1111-1111");
 
-        // Act & Assert: Try to update with path parameter ID of 4
-        // This should throw an exception because 999 != 4
+        Client clientWithId6 = new Client(6, "john 6", "johnupdated6@email.com",
+                "555-99996", "4566 New Street", "6111-1111-1111-1111");
+
+        when(clientService.clientExists(6)).thenReturn(true);
+
+        // This should throw an exception because 999 != 6
         ClientController.InvalidClientDataException exception = assertThrows(
                 ClientController.InvalidClientDataException.class,
-                () -> clientController.updateClient(4, clientWithWrongId)
+                () -> clientController.updateClient(6, clientWithWrongId)
         );
 
         // Verify the exception message is what we expect
-        assertEquals("Path ID (4) does not match JSON ID (999)", exception.getMessage());
+        assertEquals("Path ID (6) does not match JSON ID (999)", exception.getMessage());
 
         // Verify that we never checked if client exists or tried to update
         // because the validation should fail early
-        verify(clientService, never()).clientExists(anyInt());
         verify(clientService, never()).updateClient(any(Client.class));
     }
 
