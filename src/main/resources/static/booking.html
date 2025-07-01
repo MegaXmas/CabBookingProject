@@ -119,7 +119,6 @@
                                     <h5>💰 Estimated Fare: <span id="fareAmount">$0.00</span></h5>
                                     <p>Distance: <span id="distanceAmount">0.0</span> km</p>
                                     <p class="mb-0">Booking confirmed for <span id="confirmedClientName"></span></p>
-                                    <small class="text-muted">Final price may vary based on traffic and route conditions</small>
                                 </div>
                             </div>
                         </div>
@@ -147,11 +146,6 @@
 
 <!-- JavaScript with Test Client Integration -->
 <script>
-    // ============================================================================
-    // TEST CLIENT CONFIGURATION
-    // This is where we create our "logged in" test client
-    // In a real app, this would come from a login system or user session
-    // ============================================================================
 
     const TEST_CLIENT = {
         id: 1,                                    // Simple test ID
@@ -162,13 +156,13 @@
         credit_card: "4111-1111-1111-1234"       // Test credit card
     };
 
-    // Display the test client info in the header (so you know who you're "logged in" as)
+    // Display the test client info in the header
     document.getElementById('testClientName').textContent = TEST_CLIENT.name;
 
     // ============================================================================
     // FORM SUBMISSION HANDLER
-    // This function now sends both the test client AND the route information
-    // to your existing backend, without requiring any backend changes
+    // Sends both the test client AND the route information
+    // to the existing backend
     // ============================================================================
 
     document.getElementById('bookingForm').addEventListener('submit', function(e) {
@@ -178,7 +172,7 @@
         const pickup = document.getElementById('pickupLocation').value;
         const dropoff = document.getElementById('dropoffLocation').value;
 
-        // Simple validation (same as before)
+        // Simple validation
         if (!pickup || !dropoff) {
             showMessage('Please select both pickup and drop-off locations!', 'error');
             return;
@@ -191,12 +185,6 @@
 
         // Show loading animation
         showLoading(true);
-
-        // ============================================================================
-        // Here's the key insight: we send BOTH the test client data AND the route data
-        // to your existing backend endpoint, allowing it to create both the Client object
-        // and the Route object as needed
-        // ============================================================================
 
         // Create the booking request that includes both client and trip information
         const bookingRequest = {
@@ -211,8 +199,8 @@
         console.log('Sending booking request with test client:', TEST_CLIENT.name);
         console.log('Trip:', pickup, '->', dropoff);
 
-        // Send to your existing backend - but now we're sending complete information
-        // Your backend can use both pieces: the client object for bookCab() and
+        // Send to backend
+        // The backend can use both pieces: the client object for bookCab() and
         // the location names for route creation
         fetch('/booking/test-booking', {
             method: 'POST',
@@ -255,7 +243,7 @@
     });
 
     // ============================================================================
-    // UTILITY FUNCTIONS (same as before, but with updated text)
+    // UTILITY FUNCTIONS
     // ============================================================================
 
     function showMessage(message, type) {
@@ -296,7 +284,6 @@
 
     // ============================================================================
     // HELPFUL DEBUGGING: Log the test client info to console
-    // This helps you see exactly what data is being sent to your backend
     // ============================================================================
 
     console.log('=== TEST CLIENT MODE ACTIVE ===');
