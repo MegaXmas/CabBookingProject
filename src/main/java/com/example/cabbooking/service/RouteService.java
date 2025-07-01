@@ -27,6 +27,12 @@ public class RouteService {
         this.locationDistanceCalculatorService = locationDistanceCalculatorService;
     }
 
+    /**
+     * method which creates a new Route object from two Location object parameters
+     * @param from initial location
+     * @param to location destination
+     * @return the created Route
+     */
     public Route createRoute(Location from, Location to) {
 
         validateRouteInputs(from, to);

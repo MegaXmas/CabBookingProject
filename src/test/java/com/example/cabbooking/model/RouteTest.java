@@ -9,7 +9,6 @@ public class RouteTest {
     private Location startLocation;
     private Location endLocation;
 
-    // Set up test locations before each test
     @BeforeEach
     public void setUp() {
         startLocation = new Location("Central Park", 40.7829, -73.9654);
@@ -38,7 +37,7 @@ public class RouteTest {
         assertEquals(2.5, route.getDistance());
     }
 
-    // Test that setters and getters work properly for 'from' location
+    // Test 'from' location getter and setter
     @Test
     public void testFromGetterAndSetter() {
         Route route = new Route();
@@ -111,7 +110,7 @@ public class RouteTest {
         assertEquals(5.0, route.getDistance());
     }
 
-    // Test that we can modify location objects after setting them in route
+    // Test that location objects can be modified after setting them in route
     @Test
     public void testLocationObjectModification() {
         Location modifiableLocation = new Location("Test Location", 10.0, 20.0);
@@ -169,7 +168,7 @@ public class RouteTest {
 
     @Test
     void testEqualsWithDifferentFromAndToValues() {
-        //Should be false
+        //should be false
 
         Location location1 = new Location("location1", 10.0, 20.0);
         Location location2 = new Location("location2", 10.0, 20.0);

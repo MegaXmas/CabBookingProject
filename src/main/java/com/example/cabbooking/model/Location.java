@@ -8,7 +8,7 @@ public class Location {
     private double longitude;
     private String locationName;
 
-    //-------------Constructors---------------
+    //================Constructors====================
     public Location() {}
 
 
@@ -18,11 +18,10 @@ public class Location {
         this.longitude = longitude;
     }
 
-    //------------Getters and Setters-------------
+    //===============Getters and Setters================
     public double getLatitude() {
         return latitude;
     }
-
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
@@ -30,7 +29,6 @@ public class Location {
     public double getLongitude() {
         return longitude;
     }
-
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
@@ -38,10 +36,10 @@ public class Location {
     public String getLocationName() {
         return locationName;
     }
-
     public void setLocationName(String locationName) {
         this.locationName = locationName;
     }
+
 
     @Override
     public boolean equals(Object o) {

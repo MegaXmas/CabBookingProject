@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class BookingService {
 
+    //===========SERVICES============
     private final RouteService routeService;
     private final LocationDistanceCalculatorService locationDistanceCalculatorService;
 
-    // ✅ Custom exceptions for booking-related problems
+    // ============Custom exceptions for booking-related problems=============
     public static class InvalidBookingException extends RuntimeException {
         public InvalidBookingException(String message) {
             super(message);
@@ -31,15 +32,20 @@ public class BookingService {
         this.locationDistanceCalculatorService = locationDistanceCalculatorService;
     }
 
+    /**
+     * business logic for booking
+     * @param client The Client who is booking the Route
+     * @param route The Route which is being booked and run through the services
+     */
     public void bookCab(Client client, Route route) {
-        // ✅ Validate inputs
+        // Validate inputs
         validateBookingInputs(client, route);
 
         try {
             Location from = routeService.getRouteLocationFrom(route);
             Location to = routeService.getRouteLocationTo(route);
 
-            // ✅ Additional validation after getting locations
+            //Additional validation after getting locations
             if (from.equals(to)) {
                 throw new InvalidBookingException("Cannot book cab for same pickup and destination location: " + from.getLocationName());
             }
@@ -47,13 +53,14 @@ public class BookingService {
             System.out.println("Booking cab from " + from + " to " + to);
             System.out.println("Booking cab for client " + client.getName() + " (ID: " + client.getId() + ")");
 
-            // ✅ Validate distance calculation
+            //Validate distance calculation
             double calculatedDistance = locationDistanceCalculatorService.calculateDistanceUsingLocation(from, to);
             double routeDistance = routeService.getRouteDistance(route);
 
-            // Check if distances are reasonably close (allow 10% variance for rounding)
+            //Check if distances are close enough (allow 10% variance for rounding)
             if (Math.abs(calculatedDistance - routeDistance) > (calculatedDistance * 0.1)) {
-                System.out.println("Warning: Route distance (" + routeDistance + ") differs significantly from calculated distance (" + calculatedDistance + ")");
+                System.out.println("Warning: Route distance (" + routeDistance + ") " +
+                        "differs significantly from calculated distance (" + calculatedDistance + ")");
             }
 
             locationDistanceCalculatorService.printDistanceReport(from, to);
@@ -66,12 +73,17 @@ public class BookingService {
             throw new BookingProcessException("Cannot book cab due to invalid location: " + e.getMessage());
         } catch (Exception e) {
             if (e instanceof InvalidBookingException || e instanceof BookingProcessException) {
-                throw e; // Re-throw our custom exceptions
+                throw e; // Re-throw custom exceptions
             }
             throw new BookingProcessException("Failed to book cab: " + e.getMessage());
         }
     }
 
+    /**
+     * varify booking was completed successfully
+     * @param client The Client who is booking the Route
+     * @param route The Route which is being booked and run through the services
+     */
     public void finishBookingCab(Client client, Route route) {
         // ✅ Validate inputs
         validateBookingInputs(client, route);
@@ -94,7 +106,11 @@ public class BookingService {
         }
     }
 
-    // ✅ Helper method to validate booking inputs
+    /**
+     * Helper method to validate booking inputs
+     * @param client The Client who is booking the Route and needs to be validated
+     * @param route The Route which needs to be validated before being run through the services
+     * */
     private void validateBookingInputs(Client client, Route route) {
         if (client == null) {
             throw new InvalidBookingException("Client cannot be null");
@@ -117,7 +133,10 @@ public class BookingService {
         }
     }
 
-    // ✅ Helper method to validate client data
+    /**
+     * Helper method to validate client data
+     * @param client The Client who is booking the Route and needs to be validated
+     * */
     private void validateClientData(Client client) {
         if (client.getId() == null || client.getId() <= 0) {
             throw new InvalidBookingException("Client must have a valid ID");
@@ -137,7 +156,12 @@ public class BookingService {
         }
     }
 
-    // ✅ Utility method to check if a booking is valid (for external use)
+    /**
+     * Utility method to check if a booking is valid (for external use)
+     * @param client Client who is booking the cab which is to be verified
+     * @param route Route object which will have its parameters verified
+     * @return true if valid, false otherwise
+     */
     public boolean isValidBooking(Client client, Route route) {
         try {
             validateBookingInputs(client, route);
@@ -147,7 +171,12 @@ public class BookingService {
         }
     }
 
-    // ✅ Method to get booking summary without actually booking
+    /**
+     * Method to get booking summary without actually booking
+     * @param client The Client who is booking the Route
+     * @param route The Route for which a booking summary will be printed
+     * @return String of a booking summary
+     */
     public String getBookingSummary(Client client, Route route) {
         validateBookingInputs(client, route);
 

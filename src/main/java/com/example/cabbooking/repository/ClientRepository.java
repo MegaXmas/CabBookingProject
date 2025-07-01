@@ -1,4 +1,3 @@
-// Updated ClientRepository.java
 package com.example.cabbooking.repository;
 
 import com.example.cabbooking.model.Client;
@@ -33,6 +32,10 @@ public class ClientRepository {
         }
     }
 
+    /**
+     * method which runs a SQL query to find all clients from the database
+     * @return ArrayList of clients from the SQL database
+     */
     public List<Client> findAll() {
         try {
             List<Client> clients = jdbcTemplate.query(
@@ -46,6 +49,11 @@ public class ClientRepository {
         }
     }
 
+    /**
+     * method to run a SQL query which find a client by their id number in the database
+     * @param id Client id to find by
+     * @return Optional of a Client object if there were no errors thrown
+     */
     public Optional<Client> findById(int id) {
         if (id <= 0) {
             System.out.println("✗ Repository: Error: Invalid client ID: " + id);
@@ -70,6 +78,11 @@ public class ClientRepository {
         }
     }
 
+    /**
+     * method that runs a SQL query to create a new client in the database
+     * @param client Client object to be added to the database
+     * @return true if client was successfully added to the database, false otherwise
+     */
     public boolean newClient(Client client) {
         if (client == null) {
             System.out.println("✗ Repository: Error: Cannot create null client");
@@ -105,6 +118,11 @@ public class ClientRepository {
         }
     }
 
+    /**
+     * method that runs a SQL query to update client information in the database
+     * @param client Client object to be updated with new data
+     * true if client was successfully updated, false otherwise
+     */
     public boolean updateClient(Client client) {
         if (client == null) {
             System.out.println("✗ Repository: Error: Cannot update null client");
@@ -140,6 +158,11 @@ public class ClientRepository {
         }
     }
 
+    /**
+     * method that runs a SQL query to delete a client from the database
+     * @param id ID of the client which is to be deleted
+     * @return true if client was successfully deleted, false otherwise
+     */
     public boolean deleteClient(int id) {
         if (id <= 0) {
             System.out.println("✗ Repository: Error: Invalid client ID: " + id);

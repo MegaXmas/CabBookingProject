@@ -20,7 +20,7 @@ public class ClientService {
 
    /**
     * Get all clients from the database
-    * @return List of all clients (empty list if none found or error occurs)
+    * @return List of all clients (empty list if none found or error occurs
     */
    public List<Client> getAllClients() {
       return clientRepository.findAll();

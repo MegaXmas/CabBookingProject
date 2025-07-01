@@ -5,37 +5,27 @@ import com.example.cabbooking.model.Location;
 import com.example.cabbooking.model.Route;
 import com.example.cabbooking.service.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.util.Optional;
+import java.util.*;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
-@ExtendWith(MockitoExtension.class) // This enables Mockito annotations without loading Spring context
-class BookingControllerTest {
+/**
+ * This test class demonstrates several important testing concepts:
+ * 1. Unit Testing: We test each method in isolation
+ * 2. Mocking: We create fake versions of dependencies so we can control their behavior
+ * 3. Test Data Setup: We create consistent test data that represents real scenarios
+ * 4. Assertion Testing: We verify that our code produces the expected results
+ */
+public class BookingControllerTest {
 
-    // MockMvc for simulating HTTP requests - configured manually rather than via Spring
-    private MockMvc mockMvc;
-
-    // ObjectMapper for JSON serialization - created manually for better test control
-    private ObjectMapper objectMapper;
-
-    // Pure Mockito mocks - no Spring involvement, just mock objects for testing
     @Mock
     private BookingService bookingService;
 
@@ -43,514 +33,599 @@ class BookingControllerTest {
     private CalculateFareService calculateFareService;
 
     @Mock
-    private PaymentService paymentService;
+    private LocationService locationService;
 
     @Mock
     private RouteService routeService;
 
-    @Mock
-    private ClientService clientService;
-
-    // The controller under test - Mockito will inject the mocks above into this instance
-    @InjectMocks
     private BookingController bookingController;
 
-    // Test data that we'll reuse across multiple tests
-    private Client testClient;
+    private Location whiteHouse;
+    private Location lincolnMemorial;
     private Route testRoute;
-    private Location fromLocation;
-    private Location toLocation;
+    private Client testClient;
 
-    /**
-     * Set up the testing environment before each test runs
-     *
-     * This method demonstrates the modern approach to test setup. Instead of relying on
-     * Spring to configure our testing environment, we manually create the components we need.
-     * This gives us complete control and makes our tests much faster since we're not loading
-     * the entire Spring application context.
-     */
     @BeforeEach
-    void setUp() {
-        // Create ObjectMapper for JSON processing - in the old approach, Spring provided this
-        objectMapper = new ObjectMapper();
+    public void setUp() {
+        // Initialize the mocks
+        MockitoAnnotations.openMocks(this);
 
-        // Manually configure MockMvc to test our controller - this is the key difference
-        // We're building MockMvc around our specific controller instance with its injected mocks
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(bookingController) // Focus only on our controller
-                .build(); // No Spring context needed!
+        // Create the controller with the mock dependencies
+        bookingController = new BookingController(
+                bookingService,
+                calculateFareService,
+                locationService,
+                routeService
+        );
 
-        // Create consistent test data for use across all test methods
-        // Having predictable test data makes our tests more reliable and easier to debug
-        fromLocation = new Location("Times Square", 40.7580, -73.9855);
-        toLocation = new Location("Central Park", 40.7829, -73.9654);
+        // Set up realistic test data
+        whiteHouse = new Location("The White House", 38.8977, -77.0365);
+        lincolnMemorial = new Location("Lincoln Memorial", 38.8893, -77.0502);
 
-        testClient = new Client(1, "John Doe", "john@email.com",
+        // Create a route between these locations
+        testRoute = new Route(whiteHouse, lincolnMemorial, 2.5); // 2.5 km distance
+
+        // Create a test client for the original booking method
+        testClient = new Client(1, "John Doe", "john@example.com",
                 "555-1234", "123 Main St", "4111-1111-1111-1111");
-
-        testRoute = new Route(fromLocation, toLocation, 2.5);
-
-        System.out.println("✓ Modern test setup completed - no Spring context loaded!");
-        System.out.println("✓ Testing with client: " + testClient.getName() +
-                " and route distance: " + testRoute.getDistance() + " miles");
     }
 
-    // =================== TESTING THE MAIN BOOKING ENDPOINT ===================
+    // === TESTING WEB BOOKING FUNCTIONALITY ===
+
+    @Test
+    public void testCalculateWebBookingFare_Success() {
+
+        when(locationService.findLocationByName("The White House")).thenReturn(whiteHouse);
+        when(locationService.findLocationByName("Lincoln Memorial")).thenReturn(lincolnMemorial);
+
+        // Mock the route service to return the test route
+        when(routeService.createRoute(whiteHouse, lincolnMemorial)).thenReturn(testRoute);
+
+        // Mock the fare calculation ($3 base + $3/mile)
+        // Distance is 2.5 km = ~1.55 miles, so fare should be $3 + (1.55 * 3) = ~$7.65
+        when(calculateFareService.calculateFare(testRoute)).thenReturn(7.65);
+
+        // Create the request that would come from the web form
+        BookingController.WebBookingRequest request = new BookingController.WebBookingRequest(
+                "The White House", "Lincoln Memorial"
+        );
+
+        // ACT: Call the method we're testing
+        ResponseEntity<Map<String, Object>> response = bookingController.calculateWebBookingFare(request);
+
+        // ASSERT: Verify everything worked as expected
+
+        // Verify a successful HTTP response
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Get the response body to examine the details
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+
+        // Verify the response contains all the expected information
+        assertTrue((Boolean) responseBody.get("success"));
+        assertEquals("The White House", responseBody.get("pickupLocation"));
+        assertEquals("Lincoln Memorial", responseBody.get("dropoffLocation"));
+        assertEquals(2.5, responseBody.get("distance"));
+        assertEquals(7.65, responseBody.get("fareAmount"));
+
+        // VERIFY: Make sure the services were called correctly
+        verify(locationService).findLocationByName("The White House");
+        verify(locationService).findLocationByName("Lincoln Memorial");
+        verify(routeService).createRoute(whiteHouse, lincolnMemorial);
+        verify(calculateFareService).calculateFare(testRoute);
+
+        System.out.println(responseBody);
+    }
+
+    @Test
+    public void testCalculateWebBookingFare_PickupLocationNotFound() {
+        // ARRANGE: Set up a scenario where the pickup location doesn't exist
+        when(locationService.findLocationByName("Nonexistent Place")).thenReturn(null);
+        when(locationService.findLocationByName("Lincoln Memorial")).thenReturn(lincolnMemorial);
+
+        BookingController.WebBookingRequest request = new BookingController.WebBookingRequest(
+                "Nonexistent Place", "Lincoln Memorial"
+        );
+
+        // ACT: Try to calculate fare with invalid pickup location
+        ResponseEntity<Map<String, Object>> response = bookingController.calculateWebBookingFare(request);
+
+        // ASSERT: Verify we get appropriate error response
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertFalse((Boolean) responseBody.get("success"));
+        assertTrue(((String) responseBody.get("error")).contains("Pickup location not found"));
+
+        // VERIFY: Ensure we didn't try to create routes with invalid data
+        verify(routeService, never()).createRoute(any(), any());
+        verify(calculateFareService, never()).calculateFare(any());
+    }
+
+    @Test
+    public void testCalculateWebBookingFare_DropoffLocationNotFound() {
+        // ARRANGE: Valid pickup, invalid dropoff
+        when(locationService.findLocationByName("The White House")).thenReturn(whiteHouse);
+        when(locationService.findLocationByName("Nonexistent Place")).thenReturn(null);
+
+        BookingController.WebBookingRequest request = new BookingController.WebBookingRequest(
+                "The White House", "Nonexistent Place"
+        );
+
+        // ACT & ASSERT: Similar to above test but for dropoff location
+        ResponseEntity<Map<String, Object>> response = bookingController.calculateWebBookingFare(request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<String, Object> responseBody = response.getBody();
+        assertFalse((Boolean) responseBody.get("success"));
+        assertTrue(((String) responseBody.get("error")).contains("Drop-off location not found"));
+
+        System.out.println(responseBody);
+    }
+
+    @Test
+    public void testCalculateWebBookingFare_ServiceException() {
+        // ARRANGE: Set up scenario where everything looks good but fare calculation fails
+        when(locationService.findLocationByName("The White House")).thenReturn(whiteHouse);
+        when(locationService.findLocationByName("Lincoln Memorial")).thenReturn(lincolnMemorial);
+        when(routeService.createRoute(whiteHouse, lincolnMemorial)).thenReturn(testRoute);
+
+        // Simulate the fare service throwing an exception
+        when(calculateFareService.calculateFare(testRoute))
+                .thenThrow(new RuntimeException("Fare calculation system temporarily unavailable"));
+
+        BookingController.WebBookingRequest request = new BookingController.WebBookingRequest(
+                "The White House", "Lincoln Memorial"
+        );
+
+        // ACT: Try to calculate fare when service fails
+        ResponseEntity<Map<String, Object>> response = bookingController.calculateWebBookingFare(request);
+
+        // ASSERT: Verify we handle the error gracefully
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        Map<String, Object> responseBody = response.getBody();
+        assertFalse((Boolean) responseBody.get("success"));
+        assertTrue(((String) responseBody.get("error")).contains("Error calculating fare"));
+
+        System.out.println(responseBody);
+    }
+
+    // === TESTING THE GET LOCATIONS FUNCTIONALITY ===
+
+    @Test
+    public void testGetAllLocations_Success() {
+        // ARRANGE: Create a list of locations that the service would return
+        List<Location> expectedLocations = Arrays.asList(whiteHouse, lincolnMemorial);
+        when(locationService.getAllLocations()).thenReturn(expectedLocations);
+
+        // ACT: Call the get locations endpoint
+        ResponseEntity<List<Location>> response = bookingController.getAllLocations();
+
+        // ASSERT: Verify we get the expected locations
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<Location> responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(2, responseBody.size());
+        assertTrue(responseBody.contains(whiteHouse));
+        assertTrue(responseBody.contains(lincolnMemorial));
+
+        // VERIFY: Ensure the service was called
+        verify(locationService).getAllLocations();
+
+        System.out.println(responseBody);
+    }
+
+    @Test
+    public void testGetAllLocations_ServiceException() {
+        // ARRANGE: Simulate the location service throwing an exception
+        when(locationService.getAllLocations())
+                .thenThrow(new RuntimeException("Database connection failed"));
+
+        // ACT: Try to get locations when service fails
+        ResponseEntity<List<Location>> response = bookingController.getAllLocations();
+
+        // ASSERT: Verify we handle the error appropriately
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    // === TESTING THE ORIGINAL BOOKING FUNCTIONALITY ===
+
+    @Test
+    public void testBookCab_OriginalFunctionality() {
+        // ARRANGE: Set up the original booking scenario
+        // We don't need to mock return values here because this method doesn't return anything
+
+        // ACT: Call the original booking method
+        // This should work exactly as it did before our changes
+        assertDoesNotThrow(() -> {
+            bookingController.bookCab(testClient, testRoute);
+        });
+
+        // VERIFY: Ensure both services were called as expected
+        verify(bookingService).bookCab(testClient, testRoute);
+        verify(calculateFareService).calculateFare(testRoute);
+    }
+
+    // === TESTING EDGE CASES AND DATA VALIDATION ===
+
+    @Test
+    public void testWebBookingRequest_DataHandling() {
+        // Test the default constructor
+        BookingController.WebBookingRequest emptyRequest = new BookingController.WebBookingRequest();
+        assertNull(emptyRequest.getPickupLocation());
+        assertNull(emptyRequest.getDropoffLocation());
+
+        // Test the parameterized constructor
+        BookingController.WebBookingRequest filledRequest = new BookingController.WebBookingRequest(
+                "Test Pickup", "Test Dropoff"
+        );
+        assertEquals("Test Pickup", filledRequest.getPickupLocation());
+        assertEquals("Test Dropoff", filledRequest.getDropoffLocation());
+
+        // Test the setters
+        emptyRequest.setPickupLocation("New Pickup");
+        emptyRequest.setDropoffLocation("New Dropoff");
+        assertEquals("New Pickup", emptyRequest.getPickupLocation());
+        assertEquals("New Dropoff", emptyRequest.getDropoffLocation());
+
+        // Test toString (useful for debugging and logging)
+        String stringRepresentation = filledRequest.toString();
+        assertTrue(stringRepresentation.contains("Test Pickup"));
+        assertTrue(stringRepresentation.contains("Test Dropoff"));
+    }
+
+    @Test
+    public void testCalculateWebBookingFare_EdgeCases() {
+        // Test with locations that have the same name (should work fine)
+        Location duplicateNameLocation = new Location("Union Station", 38.8973, -77.0065);
+        when(locationService.findLocationByName("Union Station")).thenReturn(duplicateNameLocation);
+
+        Route sameLocationRoute = new Route(duplicateNameLocation, duplicateNameLocation, 0.0);
+        when(routeService.createRoute(duplicateNameLocation, duplicateNameLocation)).thenReturn(sameLocationRoute);
+        when(calculateFareService.calculateFare(sameLocationRoute)).thenReturn(3.0); // Just the base fee
+
+        BookingController.WebBookingRequest sameLocationRequest = new BookingController.WebBookingRequest(
+                "Union Station", "Union Station"
+        );
+
+        ResponseEntity<Map<String, Object>> response = bookingController.calculateWebBookingFare(sameLocationRequest);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map<String, Object> responseBody = response.getBody();
+        assertTrue((Boolean) responseBody.get("success"));
+        assertEquals(0.0, responseBody.get("distance")); // No distance for same location
+        assertEquals(3.0, responseBody.get("fareAmount")); // Just the base booking fee
+    }
+
+    // =============TESTING THE TEST BOOKING FUNCTIONALITY===========
 
     /**
-     * Testing the main booking functionality with the modern approach
+     * This tests the complete test booking flow INTEGRATION between multiple services:
+     * - LocationService finds the locations
+     * - RouteService creates the route
+     * - CalculateFareService calculates the fare
+     * - BookingService actually books the cab
      *
-     * These tests demonstrate how we can achieve the same comprehensive coverage
-     * as before, but with faster, more focused tests that don't depend on Spring's
-     * application context loading mechanisms.
+     * Verifies that all these services work together correctly when called
+     * through the test booking endpoint
      */
-    @Nested
-    @DisplayName("POST /booking - Main Booking Endpoint Tests")
-    class MainBookingEndpointTests {
+    @Test
+    public void testTestBooking_CompleteFlowSuccess() {
+        System.out.println("=== Testing Complete Test Booking Flow ===");
 
-        @Test
-        @DisplayName("Should successfully book a cab when all data is valid")
-        void testBookCabSuccess() throws Exception {
-            // ARRANGE: Configure our mock services to return predictable values
-            // This is pure Mockito - no Spring bean replacement happening here
-            when(calculateFareService.calculateFare(any(Route.class))).thenReturn(10.50);
+        // ARRANGE: Set up test scenario with a realistic test client to simulate client data that the HTML form would send
+        BookingController.TestBookingRequest.TestClient testClientData =
+                new BookingController.TestBookingRequest.TestClient();
+        testClientData.setId(1);
+        testClientData.setName("John Test Doe");
+        testClientData.setEmail("john.test@example.com");
+        testClientData.setPhone("555-123-4567");
+        testClientData.setAddress("123 Test Street, Washington DC");
+        testClientData.setCredit_card("4111-1111-1111-1234");
 
-            // Configure the booking service to do nothing (void method) when called
-            doNothing().when(bookingService).bookCab(any(Client.class), any(Route.class));
+        // Create the complete test booking request
+        BookingController.TestBookingRequest request = new BookingController.TestBookingRequest();
+        request.setClient(testClientData);
+        request.setPickupLocation("The White House");
+        request.setDropoffLocation("Lincoln Memorial");
 
-            // ACT & ASSERT: Send HTTP request and verify the response
-            // Notice how we're testing the full HTTP layer behavior, including JSON parsing
-            mockMvc.perform(post("/booking")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(createBookingRequestJson(testClient, testRoute)))
-                    .andDo(print()) // Helpful for debugging - shows actual request/response
-                    .andExpect(status().isOk()) // Verify HTTP 200 OK status
-                    .andExpect(content().string("Cab booked successfully! Fare: $10.50"));
+        // Mock all the service calls that should happen during the booking process
+        // Step 1: Location finding should work
+        when(locationService.findLocationByName("The White House")).thenReturn(whiteHouse);
+        when(locationService.findLocationByName("Lincoln Memorial")).thenReturn(lincolnMemorial);
 
-            // VERIFY: Confirm that our controller called the services as expected
-            // This ensures our controller is orchestrating the business logic correctly
-            verify(bookingService, times(1)).bookCab(any(Client.class), any(Route.class));
-            verify(calculateFareService, times(1)).calculateFare(any(Route.class));
+        // Step 2: Route creation should work
+        when(routeService.createRoute(whiteHouse, lincolnMemorial)).thenReturn(testRoute);
 
-            System.out.println("✓ Main booking flow verified with modern testing approach");
-        }
+        // Step 3: Fare calculation should work
+        when(calculateFareService.calculateFare(testRoute)).thenReturn(7.65);
 
-        @Test
-        @DisplayName("Should return 400 Bad Request when client is null")
-        void testBookCabWithNullClient() throws Exception {
-            // ACT & ASSERT: Test validation behavior with null client
-            // The beauty of this approach is that we're testing pure controller logic
-            // without any Spring bean lifecycle complications
-            mockMvc.perform(post("/booking")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(createBookingRequestJson(null, testRoute)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().string(containsString("Invalid client: Client information is required")));
+        // Step 4: Verify bookingService.bookCab() should be called with proper objects
 
-            // VERIFY: Ensure business logic services are not called when validation fails
-            // This confirms our controller properly validates input before processing
-            verify(bookingService, never()).bookCab(any(), any());
-            verify(calculateFareService, never()).calculateFare(any());
+        // ACT: Call the test booking method
+        ResponseEntity<Map<String, Object>> response = bookingController.testBooking(request);
 
-            System.out.println("✓ Input validation working correctly");
-        }
+        // ASSERT: Verify the complete flow worked correctly
 
-        @Test
-        @DisplayName("Should return 400 Bad Request when route is null")
-        void testBookCabWithNullRoute() throws Exception {
-            mockMvc.perform(post("/booking")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(createBookingRequestJson(testClient, null)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().string(containsString("Invalid route: Route information is required")));
+        // Verify a successful response
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Should return successful HTTP status");
 
-            verify(bookingService, never()).bookCab(any(), any());
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody, "Response body should not be null");
 
-            System.out.println("✓ Route validation working correctly");
-        }
+        // Verify the response contains all expected booking information
+        assertTrue((Boolean) responseBody.get("success"), "Booking should be marked as successful");
+        assertEquals("The White House", responseBody.get("pickupLocation"), "Should return correct pickup location");
+        assertEquals("Lincoln Memorial", responseBody.get("dropoffLocation"), "Should return correct dropoff location");
+        assertEquals(2.5, responseBody.get("distance"), "Should return correct distance");
+        assertEquals(7.65, responseBody.get("fareAmount"), "Should return correct fare amount");
+        assertEquals("John Test Doe", responseBody.get("clientName"), "Should return correct client name");
 
-        @Test
-        @DisplayName("Should handle unexpected service errors gracefully")
-        void testBookCabServiceException() throws Exception {
-            // ARRANGE: Simulate a service failure to test error handling
-            // This tests how our controller responds when dependencies fail
-            doThrow(new RuntimeException("Database connection failed"))
-                    .when(bookingService).bookCab(any(Client.class), any(Route.class));
+        // VERIFY: ensure all services were called correctly
 
-            // ACT & ASSERT: Verify graceful error handling
-            mockMvc.perform(post("/booking")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(createBookingRequestJson(testClient, testRoute)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().string(containsString("Booking failed: Database connection failed")));
+        // Verify location service was used to find both locations
+        verify(locationService).findLocationByName("The White House");
+        verify(locationService).findLocationByName("Lincoln Memorial");
 
-            System.out.println("✓ Exception handling verified");
-        }
+        // Verify route service was used to create the route
+        verify(routeService).createRoute(whiteHouse, lincolnMemorial);
+
+        // Verify fare calculation service was used
+        verify(calculateFareService).calculateFare(testRoute);
+
+        // Ensure bookingService.bookCab() was called
+        // and verify that the Client object was created correctly from the test data
+        verify(bookingService).bookCab(any(Client.class), eq(testRoute));
+
+        System.out.println("✓ Complete test booking flow verified successfully");
+        System.out.println("Response: " + responseBody);
     }
 
-    // =================== TESTING THE QUICK BOOKING ENDPOINT ===================
+    @Test
+    public void testTestBooking_ClientObjectCreatedCorrectly() {
+        System.out.println("=== Testing Client Object Creation ===");
 
-    @Nested
-    @DisplayName("POST /booking/quick-book - Quick Booking Tests")
-    class QuickBookingEndpointTests {
+        // ARRANGE: Create test client data with specific values we can verify
+        BookingController.TestBookingRequest.TestClient testClientData =
+                new BookingController.TestBookingRequest.TestClient();
+        testClientData.setId(42);  // Using distinctive values to make verification clear
+        testClientData.setName("Jane Test Smith");
+        testClientData.setEmail("jane.test@verification.com");
+        testClientData.setPhone("555-999-8888");
+        testClientData.setAddress("456 Verification Ave");
+        testClientData.setCredit_card("5555-4444-3333-2222");
 
-        @Test
-        @DisplayName("Should successfully create quick booking when client exists")
-        void testQuickBookingSuccess() throws Exception {
-            // ARRANGE: Set up a complete successful quick booking scenario
-            // Notice how we're precisely controlling each service dependency
-            when(clientService.clientExists(1)).thenReturn(true);
-            when(clientService.getClientById(1)).thenReturn(Optional.of(testClient));
-            when(routeService.createRoute(any(Location.class), any(Location.class))).thenReturn(testRoute);
-            when(calculateFareService.calculateFare(any(Route.class))).thenReturn(15.75);
-            doNothing().when(bookingService).bookCab(any(Client.class), any(Route.class));
+        BookingController.TestBookingRequest request = new BookingController.TestBookingRequest();
+        request.setClient(testClientData);
+        request.setPickupLocation("The White House");
+        request.setDropoffLocation("Pentagon");
 
-            // Create the request object that matches our controller's expectations
-            BookingController.QuickBookingRequest request = new BookingController.QuickBookingRequest();
-            request.setClientId(1);
-            request.setFromLocation(fromLocation);
-            request.setToLocation(toLocation);
+        // Mock the services to return valid responses
+        when(locationService.findLocationByName("The White House")).thenReturn(whiteHouse);
+        Location pentagon = new Location("Pentagon", 38.8719, -77.0563);
+        when(locationService.findLocationByName("Pentagon")).thenReturn(pentagon);
 
-            // ACT & ASSERT: Test the complete quick booking flow
-            mockMvc.perform(post("/booking/quick-book")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("Quick booking successful!")))
-                    .andExpect(content().string(containsString("From: Times Square")))
-                    .andExpect(content().string(containsString("To: Central Park")))
-                    .andExpect(content().string(containsString("Fare: $15.75")));
+        Route testRoute2 = new Route(whiteHouse, pentagon, 5.2);
+        when(routeService.createRoute(whiteHouse, pentagon)).thenReturn(testRoute2);
+        when(calculateFareService.calculateFare(testRoute2)).thenReturn(18.60);
 
-            // VERIFY: Confirm the entire workflow executed in the correct sequence
-            // This ensures our controller properly orchestrates multiple service calls
-            verify(clientService).clientExists(1);
-            verify(clientService).getClientById(1);
-            verify(routeService).createRoute(fromLocation, toLocation);
-            verify(bookingService).bookCab(testClient, testRoute);
-            verify(calculateFareService).calculateFare(testRoute);
+        // ACT: Process the test booking
+        ResponseEntity<Map<String, Object>> response = bookingController.testBooking(request);
 
-            System.out.println("✓ Quick booking workflow completed successfully");
-        }
+        // ASSERT: Verify the booking was successful
+        assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        @Test
-        @DisplayName("Should return 400 when client doesn't exist")
-        void testQuickBookingClientNotFound() throws Exception {
-            // ARRANGE: Simulate a non-existent client scenario
-            when(clientService.clientExists(999)).thenReturn(false);
+        // VERIFY: Use ArgumentCaptor to capture and examine the Client object that was passed to bookingService
+        var clientCaptor = org.mockito.ArgumentCaptor.forClass(Client.class);
+        verify(bookingService).bookCab(clientCaptor.capture(), any(Route.class));
 
-            BookingController.QuickBookingRequest request = new BookingController.QuickBookingRequest();
-            request.setClientId(999);
-            request.setFromLocation(fromLocation);
-            request.setToLocation(toLocation);
+        // Now we can examine the actual Client object that was created and passed to the service
+        Client capturedClient = clientCaptor.getValue();
 
-            // ACT & ASSERT: Verify proper error handling for missing clients
-            mockMvc.perform(post("/booking/quick-book")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().string(containsString("Client not found with ID: 999")));
+        // Verify every field was transferred correctly from test data to Client object
+        assertEquals(42, capturedClient.getId(), "Client ID should match test data");
+        assertEquals("Jane Test Smith", capturedClient.getName(), "Client name should match test data");
+        assertEquals("jane.test@verification.com", capturedClient.getEmail(), "Client email should match test data");
+        assertEquals("555-999-8888", capturedClient.getPhone(), "Client phone should match test data");
+        assertEquals("456 Verification Ave", capturedClient.getAddress(), "Client address should match test data");
+        assertEquals("5555-4444-3333-2222", capturedClient.getCredit_card(), "Client credit card should match test data");
 
-            // VERIFY: Ensure processing stops at the first validation failure
-            verify(clientService).clientExists(999);
-            verify(clientService, never()).getClientById(any());
-            verify(routeService, never()).createRoute(any(), any());
-
-            System.out.println("✓ Non-existent client handling verified");
-        }
-
-        @Test
-        @DisplayName("Should handle route creation failure")
-        void testQuickBookingRouteCreationFails() throws Exception {
-            // ARRANGE: Client validation passes but route creation fails
-            when(clientService.clientExists(1)).thenReturn(true);
-            when(clientService.getClientById(1)).thenReturn(Optional.of(testClient));
-            when(routeService.createRoute(any(Location.class), any(Location.class)))
-                    .thenThrow(new RuntimeException("Invalid coordinates"));
-
-            BookingController.QuickBookingRequest request = new BookingController.QuickBookingRequest();
-            request.setClientId(1);
-            request.setFromLocation(fromLocation);
-            request.setToLocation(toLocation);
-
-            // ACT & ASSERT: Test error handling in the middle of the workflow
-            mockMvc.perform(post("/booking/quick-book")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().string(containsString("Quick booking failed: Invalid coordinates")));
-
-            System.out.println("✓ Route creation failure handling verified");
-        }
-    }
-
-    // =================== TESTING THE PAYMENT ENDPOINT ===================
-
-    @Nested
-    @DisplayName("POST /booking/payment - Payment Processing Tests")
-    class PaymentEndpointTests {
-
-        @Test
-        @DisplayName("Should successfully process payment when all data is valid")
-        void testProcessPaymentSuccess() throws Exception {
-            // ARRANGE: Configure successful payment processing scenario
-            when(clientService.getClientById(1)).thenReturn(Optional.of(testClient));
-            doNothing().when(paymentService).paymentConfirmation(
-                    any(Client.class), any(Route.class), anyDouble(), anyString());
-
-            // Create payment request with all required data
-            BookingController.PaymentRequest request = new BookingController.PaymentRequest();
-            request.setClientId(1);
-            request.setRoute(testRoute);
-            request.setPaymentAmount(25.50);
-            request.setCreditCardNumber("4111-1111-1111-1111");
-
-            // ACT & ASSERT: Test successful payment processing
-            mockMvc.perform(post("/booking/payment")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("Payment processed successfully!"));
-
-            // VERIFY: Ensure payment service receives correct parameters
-            verify(clientService).getClientById(1);
-            verify(paymentService).paymentConfirmation(testClient, testRoute, 25.50, "4111-1111-1111-1111");
-
-            System.out.println("✓ Payment processing verified");
-        }
-
-        @Test
-        @DisplayName("Should return 400 when client not found for payment")
-        void testProcessPaymentClientNotFound() throws Exception {
-            // ARRANGE: Simulate payment attempt for non-existent client
-            when(clientService.getClientById(999)).thenReturn(Optional.empty());
-
-            BookingController.PaymentRequest request = new BookingController.PaymentRequest();
-            request.setClientId(999);
-            request.setRoute(testRoute);
-            request.setPaymentAmount(25.50);
-            request.setCreditCardNumber("4111-1111-1111-1111");
-
-            // ACT & ASSERT: Verify client validation in payment flow
-            mockMvc.perform(post("/booking/payment")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().string(containsString("Invalid client: Client not found")));
-
-            // VERIFY: Payment should not proceed if client doesn't exist
-            verify(paymentService, never()).paymentConfirmation(any(), any(), anyDouble(), anyString());
-
-            System.out.println("✓ Payment client validation verified");
-        }
-
-        @Test
-        @DisplayName("Should handle invalid credit card error")
-        void testProcessPaymentInvalidCard() throws Exception {
-            // ARRANGE: Valid client but payment service rejects the card
-            when(clientService.getClientById(1)).thenReturn(Optional.of(testClient));
-            doThrow(new RuntimeException("invalid credit card number"))
-                    .when(paymentService).paymentConfirmation(any(), any(), anyDouble(), anyString());
-
-            BookingController.PaymentRequest request = new BookingController.PaymentRequest();
-            request.setClientId(1);
-            request.setRoute(testRoute);
-            request.setPaymentAmount(25.50);
-            request.setCreditCardNumber("1234-5678-9999-0000"); // Invalid card
-
-            // ACT & ASSERT: Test credit card validation error handling
-            mockMvc.perform(post("/booking/payment")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().string(containsString("Payment error: invalid credit card number")));
-
-            System.out.println("✓ Invalid credit card handling verified");
-        }
-
-        @Test
-        @DisplayName("Should handle incorrect payment amount")
-        void testProcessPaymentIncorrectAmount() throws Exception {
-            // ARRANGE: Valid client but wrong payment amount
-            when(clientService.getClientById(1)).thenReturn(Optional.of(testClient));
-            doThrow(new IllegalArgumentException("incorrect payment amount"))
-                    .when(paymentService).paymentConfirmation(any(), any(), anyDouble(), anyString());
-
-            BookingController.PaymentRequest request = new BookingController.PaymentRequest();
-            request.setClientId(1);
-            request.setRoute(testRoute);
-            request.setPaymentAmount(10.00); // Wrong amount
-            request.setCreditCardNumber("4111-1111-1111-1111");
-
-            // ACT & ASSERT: Test payment amount validation
-            mockMvc.perform(post("/booking/payment")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().string(containsString("Payment error: incorrect payment amount")));
-
-            System.out.println("✓ Payment amount validation verified");
-        }
-    }
-
-    // =================== TESTING EXCEPTION HANDLING ===================
-
-    @Nested
-    @DisplayName("Exception Handling Tests")
-    class ExceptionHandlingTests {
-
-        @Test
-        @DisplayName("Should handle BookingException with 400 status")
-        void testBookingExceptionHandling() throws Exception {
-            // ARRANGE: Force an exception to test the exception handler
-            doThrow(new RuntimeException("Test exception"))
-                    .when(bookingService).bookCab(any(), any());
-
-            // ACT & ASSERT: Verify our exception handler converts exceptions properly
-            mockMvc.perform(post("/booking")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(createBookingRequestJson(testClient, testRoute)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().string(containsString("Booking failed: Test exception")));
-
-            System.out.println("✓ Exception handling mechanism verified");
-        }
-
-        @Test
-        @DisplayName("Should handle malformed JSON at framework level")
-        void testMalformedJsonHandling() throws Exception {
-            // Create clearly invalid JSON that will fail parsing
-            String malformedJson = "{ this is not valid JSON at all }";
-
-            mockMvc.perform(post("/booking")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(malformedJson))
-                    .andDo(print())
-                    .andExpect(status().is5xxServerError()) // Accept that framework returns 500
-                    .andExpect(content().string(containsString("JSON parse error"))); // Verify error type
-
-            System.out.println("✓ Framework-level JSON parsing error handling verified");
-        }
-
-        @Test
-        @DisplayName("Should handle semantically invalid booking requests")
-        void testJsonInvalidBookingData() throws Exception {
-            // Create syntactically valid JSON with invalid business data
-            String invalidBookingJson = """
-        {
-            "client": null,
-            "route": {
-                "from": null,
-                "to": null,
-                "distance": -5.0
-            }
-        }
-        """;
-
-            mockMvc.perform(post("/booking")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(invalidBookingJson))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest()) // This should trigger your custom handlers
-                    .andExpect(content().string(containsString("Invalid client")));
-
-            System.out.println("✓ Application-level validation error handling verified");
-        }
-    }
-
-    // =================== HELPER METHODS FOR CREATING TEST DATA ===================
-
-    /**
-     * Helper method to create JSON for booking requests
-     *
-     * In the modern approach, we handle JSON serialization manually rather than
-     * relying on Spring's automatic configuration. This gives us more control
-     * and makes our tests more explicit about the data format being tested.
-     */
-    private String createBookingRequestJson(Client client, Route route) throws Exception {
-        String clientJson = (client != null) ? objectMapper.writeValueAsString(client) : "null";
-        String routeJson = (route != null) ? objectMapper.writeValueAsString(route) : "null";
-
-        return String.format("{\"client\":%s,\"route\":%s}", clientJson, routeJson);
+        System.out.println("✓ Client object creation verified:");
+        System.out.println("  Created Client: " + capturedClient.toString());
+        System.out.println("  All fields transferred correctly from test data");
     }
 
     /**
-     * Helper method for creating test locations with realistic coordinates
+     * This test verifies error handling when locations aren't found during test booking
+     * This ensures your test booking is as robust as your regular booking functionality
      */
-    private Location createTestLocation(String name, double lat, double lng) {
-        return new Location(name, lat, lng);
+    @Test
+    public void testTestBooking_LocationNotFound() {
+        System.out.println("=== Testing Test Booking Error Handling ===");
+
+        // ARRANGE: Set up a test booking request with an invalid location
+        BookingController.TestBookingRequest.TestClient testClientData =
+                new BookingController.TestBookingRequest.TestClient();
+        testClientData.setId(1);
+        testClientData.setName("Error Test Client");
+        testClientData.setEmail("error@test.com");
+        testClientData.setPhone("555-000-0000");
+        testClientData.setAddress("Error Test Address");
+        testClientData.setCredit_card("0000-0000-0000-0000");
+
+        BookingController.TestBookingRequest request = new BookingController.TestBookingRequest();
+        request.setClient(testClientData);
+        request.setPickupLocation("Nonexistent Location");
+        request.setDropoffLocation("Lincoln Memorial");
+
+        // Mock location service to return null for the nonexistent location
+        when(locationService.findLocationByName("Nonexistent Location")).thenReturn(null);
+        when(locationService.findLocationByName("Lincoln Memorial")).thenReturn(lincolnMemorial);
+
+        // ACT: Try to process the test booking with invalid location
+        ResponseEntity<Map<String, Object>> response = bookingController.testBooking(request);
+
+        // ASSERT: Verify we get an appropriate error response
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Should return bad request for invalid location");
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody, "Error response body should not be null");
+        assertFalse((Boolean) responseBody.get("success"), "Should indicate booking was not successful");
+        assertTrue(((String) responseBody.get("error")).contains("One or both locations not found"),
+                "Error message should mention locations not found");
+
+        // VERIFY: Ensure booking service was NOT called when location lookup failed
+        verify(bookingService, never()).bookCab(any(Client.class), any(Route.class));
+        verify(routeService, never()).createRoute(any(), any());
+        verify(calculateFareService, never()).calculateFare(any());
+
+        System.out.println("✓ Error handling verified for invalid location");
+        System.out.println("Error Response: " + responseBody);
     }
 
     /**
-     * Helper method for creating test routes with calculated distances
+     * This test verifies that test booking handles service exceptions gracefully
+     * This simulates real-world scenarios where backend services might fail unexpectedly
      */
-    private Route createTestRoute(Location from, Location to, double distance) {
-        return new Route(from, to, distance);
+    @Test
+    public void testTestBooking_ServiceException() {
+        System.out.println("=== Testing Test Booking Exception Handling ===");
+
+        // ARRANGE: Set up a valid test booking request
+        BookingController.TestBookingRequest.TestClient testClientData =
+                new BookingController.TestBookingRequest.TestClient();
+        testClientData.setId(1);
+        testClientData.setName("Exception Test Client");
+        testClientData.setEmail("exception@test.com");
+        testClientData.setPhone("555-111-1111");
+        testClientData.setAddress("Exception Test Address");
+        testClientData.setCredit_card("1111-1111-1111-1111");
+
+        BookingController.TestBookingRequest request = new BookingController.TestBookingRequest();
+        request.setClient(testClientData);
+        request.setPickupLocation("The White House");
+        request.setDropoffLocation("Lincoln Memorial");
+
+        // Mock location service to work correctly
+        when(locationService.findLocationByName("The White House")).thenReturn(whiteHouse);
+        when(locationService.findLocationByName("Lincoln Memorial")).thenReturn(lincolnMemorial);
+        when(routeService.createRoute(whiteHouse, lincolnMemorial)).thenReturn(testRoute);
+
+        // BUT mock the fare calculation service to throw an exception
+        when(calculateFareService.calculateFare(testRoute))
+                .thenThrow(new RuntimeException("Fare calculation service is temporarily down"));
+
+        // ACT: Try to process the test booking when a service fails
+        ResponseEntity<Map<String, Object>> response = bookingController.testBooking(request);
+
+        // ASSERT: Verify we handle the exception gracefully
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode(),
+                "Should return internal server error when service fails");
+
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody, "Error response should not be null");
+        assertFalse((Boolean) responseBody.get("success"), "Should indicate booking failed");
+        assertTrue(((String) responseBody.get("error")).contains("Test booking error"),
+                "Should provide helpful error message");
+
+        // VERIFY: Ensure booking service was NOT called when fare calculation failed
+        verify(bookingService, never()).bookCab(any(Client.class), any(Route.class));
+
+        System.out.println("✓ Exception handling verified");
+        System.out.println("Error Response: " + responseBody);
     }
 
-    // =================== INTEGRATION-STYLE TESTS ===================
+    // ===============================================================================
+    // TESTING THE TEST BOOKING REQUEST DATA CLASSES
+    // These tests verify that your data transfer objects work correctly
+    // This might seem boring, but data integrity is crucial for web applications
+    // ===============================================================================
 
-    @Nested
-    @DisplayName("Integration-Style Workflow Tests")
-    class WorkflowTests {
+    /**
+     * This tests the TestBookingRequest and TestClient data classes
+     * Think of this like testing that your order forms have all the right fields
+     * and that information gets transferred correctly between forms
+     */
+    @Test
+    public void testTestBookingRequest_DataIntegrity() {
+        System.out.println("=== Testing Test Booking Request Data Classes ===");
 
-        @Test
-        @DisplayName("Should handle complete booking workflow from start to finish")
-        void testCompleteBookingWorkflow() throws Exception {
-            // This test demonstrates how the modern approach can still handle complex workflows
-            // The key difference is that we're testing controller orchestration logic rather
-            // than actual service implementations
+        // ARRANGE & ACT: Create and populate the data objects
 
-            // STEP 1: Quick booking setup
-            when(clientService.clientExists(1)).thenReturn(true);
-            when(clientService.getClientById(1)).thenReturn(Optional.of(testClient));
-            when(routeService.createRoute(any(), any())).thenReturn(testRoute);
-            when(calculateFareService.calculateFare(any())).thenReturn(12.50);
-            doNothing().when(bookingService).bookCab(any(), any());
+        // Test the TestClient inner class
+        BookingController.TestBookingRequest.TestClient testClient =
+                new BookingController.TestBookingRequest.TestClient();
 
-            BookingController.QuickBookingRequest quickRequest = new BookingController.QuickBookingRequest();
-            quickRequest.setClientId(1);
-            quickRequest.setFromLocation(fromLocation);
-            quickRequest.setToLocation(toLocation);
+        // Test all setters and getters for TestClient
+        testClient.setId(99);
+        testClient.setName("Data Test Client");
+        testClient.setEmail("data@test.com");
+        testClient.setPhone("555-222-3333");
+        testClient.setAddress("Data Test Street");
+        testClient.setCredit_card("9999-8888-7777-6666");
 
-            // Execute quick booking
-            mockMvc.perform(post("/booking/quick-book")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(quickRequest)))
-                    .andExpect(status().isOk());
+        // Test the main TestBookingRequest class
+        BookingController.TestBookingRequest request = new BookingController.TestBookingRequest();
+        request.setClient(testClient);
+        request.setPickupLocation("Data Test Pickup");
+        request.setDropoffLocation("Data Test Dropoff");
 
-            // STEP 2: Payment processing setup
-            doNothing().when(paymentService).paymentConfirmation(any(), any(), anyDouble(), anyString());
+        // ASSERT: Verify all data was stored and retrieved correctly
 
-            BookingController.PaymentRequest paymentRequest = new BookingController.PaymentRequest();
-            paymentRequest.setClientId(1);
-            paymentRequest.setRoute(testRoute);
-            paymentRequest.setPaymentAmount(12.50);
-            paymentRequest.setCreditCardNumber("4111-1111-1111-1111");
+        // Test TestClient data integrity
+        assertEquals(99, testClient.getId(), "TestClient ID should be stored correctly");
+        assertEquals("Data Test Client", testClient.getName(), "TestClient name should be stored correctly");
+        assertEquals("data@test.com", testClient.getEmail(), "TestClient email should be stored correctly");
+        assertEquals("555-222-3333", testClient.getPhone(), "TestClient phone should be stored correctly");
+        assertEquals("Data Test Street", testClient.getAddress(), "TestClient address should be stored correctly");
+        assertEquals("9999-8888-7777-6666", testClient.getCredit_card(), "TestClient credit card should be stored correctly");
 
-            // Execute payment
-            mockMvc.perform(post("/booking/payment")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(paymentRequest)))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("Payment processed successfully!"));
+        // Test TestBookingRequest data integrity
+        assertEquals(testClient, request.getClient(), "TestBookingRequest should store TestClient correctly");
+        assertEquals("Data Test Pickup", request.getPickupLocation(), "TestBookingRequest should store pickup location correctly");
+        assertEquals("Data Test Dropoff", request.getDropoffLocation(), "TestBookingRequest should store dropoff location correctly");
 
-            // VERIFY: Complete workflow verification
-            verify(clientService, times(2)).getClientById(1); // Once for booking, once for payment
-            verify(bookingService).bookCab(testClient, testRoute);
-            verify(paymentService).paymentConfirmation(testClient, testRoute, 12.50, "4111-1111-1111-1111");
+        // Test that the nested structure works correctly
+        assertEquals("Data Test Client", request.getClient().getName(), "Nested client name should be accessible");
+        assertEquals(99, request.getClient().getId(), "Nested client ID should be accessible");
 
-            System.out.println("✓ Complete modern workflow test passed!");
-        }
+        System.out.println("✓ All data classes verified successfully");
+        System.out.println("TestClient: " + testClient.getName() + " (" + testClient.getEmail() + ")");
+        System.out.println("Trip: " + request.getPickupLocation() + " -> " + request.getDropoffLocation());
+    }
+
+    /**
+     * This test verifies that default constructors work correctly
+     * This is important because Spring Boot uses default constructors when converting JSON to Java objects
+     */
+    @Test
+    public void testTestBookingRequest_DefaultConstructors() {
+        System.out.println("=== Testing Default Constructors ===");
+
+        // ACT: Create objects using default constructors (like Spring Boot would do)
+        BookingController.TestBookingRequest.TestClient testClient =
+                new BookingController.TestBookingRequest.TestClient();
+
+        BookingController.TestBookingRequest request = new BookingController.TestBookingRequest();
+
+        // ASSERT: Verify default state is reasonable
+
+        // TestClient should have null values initially
+        assertNull(testClient.getId(), "TestClient ID should be null initially");
+        assertNull(testClient.getName(), "TestClient name should be null initially");
+        assertNull(testClient.getEmail(), "TestClient email should be null initially");
+        assertNull(testClient.getPhone(), "TestClient phone should be null initially");
+        assertNull(testClient.getAddress(), "TestClient address should be null initially");
+        assertNull(testClient.getCredit_card(), "TestClient credit card should be null initially");
+
+        // TestBookingRequest should have null values initially
+        assertNull(request.getClient(), "TestBookingRequest client should be null initially");
+        assertNull(request.getPickupLocation(), "TestBookingRequest pickup should be null initially");
+        assertNull(request.getDropoffLocation(), "TestBookingRequest dropoff should be null initially");
+
+        System.out.println("✓ Default constructors work correctly");
+        System.out.println("This ensures Spring Boot can create these objects from JSON data");
     }
 }
