@@ -1,6 +1,7 @@
 package com.example.cabbooking.controller;
 
 import com.example.cabbooking.model.Client;
+import com.example.cabbooking.repository.ClientRepository;
 import com.example.cabbooking.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ public class ClientController {
     private final ClientService clientService;
 
     @Autowired
-    public ClientController(ClientService clientService) {
+    public ClientController(ClientService clientService, ClientRepository clientRepository) {
         this.clientService = clientService;
     }
 
@@ -130,19 +131,19 @@ public class ClientController {
         // Validate client data
         validateClientData(client);
 
-        if (client.getId() != null && !client.getId().equals(id)) {
+        if (client.getId() != null && !client.getId().equals(id) && clientService.clientExists(id)) {
             throw new InvalidClientDataException(
                     "Path ID (" + id + ") does not match JSON ID (" + client.getId() + ")"
             );
         }
 
-        // Set the ID from the path parameter
-        client.setId(id);
-
         // Check if client exists
         if (!clientService.clientExists(id)) {
             throw new ClientNotFoundException("Client with ID " + id + " not found");
         }
+
+        // Set the ID from the path parameter
+        client.setId(id);
 
         boolean success = clientService.updateClient(client);
 

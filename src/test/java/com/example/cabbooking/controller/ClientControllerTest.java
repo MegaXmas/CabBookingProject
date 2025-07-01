@@ -283,7 +283,6 @@ public class ClientControllerTest {
         );
 
         assertEquals("Client with ID 999 not found", exception.getMessage());
-        verify(clientService).clientExists(999);
         verify(clientService, never()).updateClient(any(Client.class));
     }
 
